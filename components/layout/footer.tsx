@@ -64,15 +64,15 @@ export function Footer() {
             <ul className="space-y-3">
               <li className="flex items-start gap-3">
                 <MapPin className="w-5 h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                <span className="text-sm">123 Medical Plaza, Suite 500, New York, NY 10001</span>
+                <span className="text-sm">Riverside drive opposite prime bank apartment called Daphton court suit  A3</span>
               </li>
               <li className="flex items-center gap-3">
                 <Phone className="w-5 h-5 text-emerald-500 flex-shrink-0" />
-                <span className="text-sm">+1 (555) 123-4567</span>
+                <span className="text-sm">+254 722 691 272 </span>
               </li>
               <li className="flex items-center gap-3">
                 <Mail className="w-5 h-5 text-emerald-500 flex-shrink-0" />
-                <span className="text-sm">info@haircarepro.com</span>
+                <span className="text-sm">jared.babu@artisticclinic.com</span>
               </li>
             </ul>
             <div className="mt-6">
