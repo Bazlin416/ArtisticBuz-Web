@@ -219,7 +219,7 @@ export default function Home() {
             </div>
           </div>
         </section>
-        {/* <section className="py-20 bg-gray-50" id="calculator">
+        <section className="py-20 bg-gray-50" id="calculator">
           <div className="container mx-auto px-4">
             <div className="max-w-7xl mx-auto">
               <div className="text-center mb-12">
@@ -251,7 +251,7 @@ export default function Home() {
               )}
             </div>
           </div>
-        </section> */}
+        </section>
       </main>
 
       <Footer />

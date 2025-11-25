@@ -211,13 +211,13 @@ export default function HairGraftCalculator() {
       {/* RESULTS */}
       <div className="flex justify-between mt-10 gap-4">
         {/* GRAFT BOX */}
-        <div className="flex-1 p-2 bg-gray-100 rounded-xl text-center shadow">
+        <div className="flex-1 p-6 bg-gray-100 rounded-xl text-center shadow">
           <p className="text-xl font-bold">GRAFT</p>
           <p className="text-3xl font-semibold mt-2">{finalGrafts}</p>
         </div>
 
         {/* HAIR BOX */}
-        <div className="flex-1 p-2 bg-blue-600 text-white rounded-xl text-center shadow">
+        <div className="flex-1 p-6 bg-blue-600 text-white rounded-xl text-center shadow">
           <p className="text-xl font-bold">HAIR</p>
           <p className="text-3xl font-semibold mt-2">{finalHair}</p>
         </div>
