@@ -73,7 +73,33 @@ export const baldnessTypes: BaldnessType[] = [
   },
 ];
 
-export const pricePerGraft = 2.5;
+export interface PricingTier {
+  min: number;
+  max: number;
+  price: number;
+}
+
+export const pricingTiers: PricingTier[] = [
+  { min: 500, max: 1000, price: 110000 },
+  { min: 1500, max: 2500, price: 150000 },
+  { min: 3500, max: 4500, price: 180000 },
+];
+
+export function calculatePrice(graftMin: number, graftMax: number): { min: number; max: number } | null {
+  const avgGrafts = Math.round((graftMin + graftMax) / 2);
+
+  for (const tier of pricingTiers) {
+    if (avgGrafts >= tier.min && avgGrafts <= tier.max) {
+      return { min: tier.price, max: tier.price };
+    }
+  }
+
+  if (avgGrafts < pricingTiers[0].min) {
+    return { min: 0, max: pricingTiers[0].price };
+  }
+
+  return null;
+}
 
 export const faqs = [
   {

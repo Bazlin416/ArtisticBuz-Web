@@ -30,12 +30,12 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Loader2, CheckCircle } from 'lucide-react';
-import { ConsultationFormData } from '@/types/calculator';
 
 const formSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   email: z.string().email('Invalid email address'),
   phone: z.string().min(10, 'Phone number must be at least 10 digits'),
+  gender: z.enum(['male', 'female', 'other']),
   preferredContact: z.enum(['email', 'phone', 'whatsapp']),
   message: z.string().optional(),
 });
@@ -45,6 +45,7 @@ interface ConsultationFormModalProps {
   onClose: () => void;
   selectedType: string;
   estimatedGrafts: string;
+  estimatedPrice?: string;
 }
 
 export function ConsultationFormModal({
@@ -52,6 +53,7 @@ export function ConsultationFormModal({
   onClose,
   selectedType,
   estimatedGrafts,
+  estimatedPrice,
 }: ConsultationFormModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -62,6 +64,7 @@ export function ConsultationFormModal({
       name: '',
       email: '',
       phone: '',
+      gender: 'male',
       preferredContact: 'email',
       message: '',
     },
@@ -78,6 +81,7 @@ export function ConsultationFormModal({
           ...values,
           selectedBaldnessType: selectedType,
           estimatedGrafts: estimatedGrafts,
+          estimatedPrice: estimatedPrice,
         }),
       });
 
@@ -129,6 +133,11 @@ export function ConsultationFormModal({
               <p className="text-sm font-medium text-gray-700">
                 Estimated: <span className="text-emerald-600">{estimatedGrafts}</span>
               </p>
+              {estimatedPrice && (
+                <p className="text-sm font-medium text-gray-700">
+                  Price: <span className="text-emerald-600">{estimatedPrice}</span>
+                </p>
+              )}
             </div>
 
             <Form {...form}>
@@ -168,8 +177,31 @@ export function ConsultationFormModal({
                     <FormItem>
                       <FormLabel>Phone Number</FormLabel>
                       <FormControl>
-                        <Input placeholder="+1 (555) 123-4567" {...field} />
+                        <Input placeholder="+254 (555) 123-4567" {...field} />
                       </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="gender"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Gender</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select gender" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="male">Male</SelectItem>
+                          <SelectItem value="female">Female</SelectItem>
+                          <SelectItem value="other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}

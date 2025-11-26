@@ -150,7 +150,40 @@ export default function Home() {
           </div>
         </section>
 
-        <HairGraftCalculator />
+        {/* <HairGraftCalculator /> */}
+        <section className="py-20 bg-gray-50" id="calculator">
+          <div className="container mx-auto px-4">
+            <div className="max-w-7xl mx-auto">
+              <div className="text-center mb-12">
+                <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                  Calculate Your Hair Restoration Needs
+                </h2>
+                <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+                  Select your hair loss pattern below to get an instant estimate
+                  of the number of grafts you may need for optimal results.
+                </p>
+              </div>
+
+              <BaldnessTypeGrid
+                types={baldnessTypes}
+                selectedType={selectedType}
+                onSelectType={handleSelectType}
+              />
+
+              {selectedType && (
+                <div
+                  id="results"
+                  className="mt-12 animate-in fade-in slide-in-from-bottom-4 duration-500"
+                >
+                  <ResultPanel
+                    selectedType={selectedType}
+                    onConsultationClick={() => setIsModalOpen(true)}
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
         <section className="py-20 bg-gradient-to-br from-gray-900 to-gray-800 text-white">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto text-center">
@@ -219,39 +252,7 @@ export default function Home() {
             </div>
           </div>
         </section>
-        <section className="py-20 bg-gray-50" id="calculator">
-          <div className="container mx-auto px-4">
-            <div className="max-w-7xl mx-auto">
-              <div className="text-center mb-12">
-                <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                  Calculate Your Hair Restoration Needs
-                </h2>
-                <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-                  Select your hair loss pattern below to get an instant estimate
-                  of the number of grafts you may need for optimal results.
-                </p>
-              </div>
-
-              <BaldnessTypeGrid
-                types={baldnessTypes}
-                selectedType={selectedType}
-                onSelectType={handleSelectType}
-              />
-
-              {selectedType && (
-                <div
-                  id="results"
-                  className="mt-12 animate-in fade-in slide-in-from-bottom-4 duration-500"
-                >
-                  <ResultPanel
-                    selectedType={selectedType}
-                    onConsultationClick={() => setIsModalOpen(true)}
-                  />
-                </div>
-              )}
-            </div>
-          </div>
-        </section>
+        
       </main>
 
       <Footer />

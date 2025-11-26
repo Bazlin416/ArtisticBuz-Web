@@ -1,7 +1,7 @@
 'use client';
 
 import { BaldnessType } from '@/types/calculator';
-import { pricePerGraft } from '@/lib/calculator-data';
+import { calculatePrice } from '@/lib/calculator-data';
 import { Button } from '@/components/ui/button';
 import { Calculator, DollarSign, Scissors } from 'lucide-react';
 
@@ -12,9 +12,10 @@ interface ResultPanelProps {
 
 export function ResultPanel({ selectedType, onConsultationClick }: ResultPanelProps) {
   const avgGrafts = Math.round((selectedType.graftMin + selectedType.graftMax) / 2);
-  const estimatedCost = {
-    min: selectedType.graftMin * pricePerGraft,
-    max: selectedType.graftMax * pricePerGraft,
+  const priceInfo = calculatePrice(selectedType.graftMin, selectedType.graftMax);
+
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('en-US').format(price);
   };
 
   return (
@@ -42,12 +43,21 @@ export function ResultPanel({ selectedType, onConsultationClick }: ResultPanelPr
         <div className="bg-white rounded-xl p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-2">
             <DollarSign className="w-5 h-5 text-emerald-600" />
-            <p className="text-sm font-medium text-gray-600">Estimated Cost</p>
+            <p className="text-sm font-medium text-gray-600">Estimated Cost (KSH)</p>
           </div>
-          <p className="text-3xl font-bold text-emerald-600">
-            ${estimatedCost.min.toLocaleString()} - ${estimatedCost.max.toLocaleString()}
-          </p>
-          <p className="text-xs text-gray-500 mt-1">At ${pricePerGraft}/graft</p>
+          {priceInfo ? (
+            <>
+              <p className="text-3xl font-bold text-emerald-600">
+                KSH {formatPrice(priceInfo.min)}
+              </p>
+              <p className="text-xs text-gray-500 mt-1">Fixed pricing</p>
+            </>
+          ) : (
+            <>
+              <p className="text-3xl font-bold text-emerald-600">Custom</p>
+              <p className="text-xs text-gray-500 mt-1">Pricing available</p>
+            </>
+          )}
         </div>
 
         <div className="bg-white rounded-xl p-6 shadow-sm">
