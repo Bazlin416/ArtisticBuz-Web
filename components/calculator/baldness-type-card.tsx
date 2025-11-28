@@ -2,32 +2,53 @@
 
 import { BaldnessType } from '@/types/calculator';
 import { cn } from '@/lib/utils';
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, Lock } from 'lucide-react';
+import { baldnessTypeImages, type GenderPreference } from '@/lib/calculator-data';
 
 interface BaldnessTypeCardProps {
   type: BaldnessType;
   isSelected: boolean;
   onSelect: (type: BaldnessType) => void;
+  genderPreference?: GenderPreference;
+  disabled?: boolean;
 }
 
-export function BaldnessTypeCard({ type, isSelected, onSelect }: BaldnessTypeCardProps) {
+export function BaldnessTypeCard({
+  type,
+  isSelected,
+  onSelect,
+  genderPreference = 'neutral',
+  disabled = false,
+}: BaldnessTypeCardProps) {
+  const displayImage = baldnessTypeImages[genderPreference][type.id as keyof typeof baldnessTypeImages.neutral] || type.image;
+
   return (
     <button
-      onClick={() => onSelect(type)}
+      onClick={() => !disabled && onSelect(type)}
+      disabled={disabled}
       className={cn(
-        'relative p-6 rounded-xl border-2 transition-all duration-300 hover:shadow-lg hover:scale-105 text-left w-full',
+        'relative p-6 rounded-xl border-2 transition-all duration-300 text-left w-full',
+        disabled
+          ? 'opacity-60 cursor-not-allowed'
+          : 'hover:shadow-lg hover:scale-105',
         isSelected
           ? 'border-emerald-500 bg-emerald-50 shadow-md'
           : 'border-gray-200 bg-white hover:border-emerald-300'
       )}
     >
-      {isSelected && (
+      {disabled && (
+        <div className="absolute top-3 right-3">
+          <Lock className="w-6 h-6 text-gray-400" />
+        </div>
+      )}
+
+      {isSelected && !disabled && (
         <div className="absolute top-3 right-3">
           <CheckCircle2 className="w-6 h-6 text-emerald-500" />
         </div>
       )}
 
-      <div className="text-6xl mb-4 text-center">{type.image}</div>
+      <div className="text-6xl mb-4 text-center">{displayImage}</div>
 
       <h3 className="font-semibold text-lg text-gray-900 mb-1">
         {type.title}

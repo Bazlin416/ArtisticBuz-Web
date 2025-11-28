@@ -2,12 +2,22 @@
 
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
-import { Heart, Menu, X } from 'lucide-react';
+import { Heart, Menu, X, User, LogOut, Crown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/contexts/auth-context';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { user, isSubscribed, signOut } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -20,9 +30,8 @@ export function Header() {
 
   const navItems = [
     { label: 'Home', href: '#' },
-    { label: 'About', href: '#about' },
-    { label: 'Services', href: '#services' },
     { label: 'Calculator', href: '#calculator' },
+    { label: 'FAQ', href: '#faq' },
     { label: 'Contact', href: '#contact' },
   ];
 
@@ -59,9 +68,37 @@ export function Header() {
             ))}
           </nav>
 
-          <Button className="hidden md:flex bg-emerald-600 hover:bg-emerald-700">
-            Book Consultation
-          </Button>
+          <div className="hidden md:flex items-center gap-4">
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="flex items-center gap-2">
+                    <User className="w-4 h-4" />
+                    <span className="max-w-[120px] truncate">{user.email}</span>
+                    {isSubscribed && <Crown className="w-4 h-4 text-amber-500" />}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem disabled>
+                    <span className="text-xs text-gray-500">
+                      {isSubscribed ? 'Premium Subscriber' : 'Free Account'}
+                    </span>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => signOut()} className="text-red-600">
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button className="bg-emerald-600 hover:bg-emerald-700">
+                Book Consultation
+              </Button>
+            )}
+          </div>
 
           <button
             className="md:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -88,9 +125,33 @@ export function Header() {
                   {item.label}
                 </a>
               ))}
-              <Button className="bg-emerald-600 hover:bg-emerald-700 w-full">
-                Book Consultation
-              </Button>
+              {user ? (
+                <>
+                  <div className="pt-2 border-t">
+                    <p className="text-sm text-gray-600 mb-2">
+                      {user.email}
+                    </p>
+                    {isSubscribed && (
+                      <div className="flex items-center gap-2 text-xs text-amber-600 mb-2">
+                        <Crown className="w-4 h-4" />
+                        Premium Subscriber
+                      </div>
+                    )}
+                    <Button
+                      onClick={() => signOut()}
+                      variant="outline"
+                      className="w-full text-red-600"
+                    >
+                      <LogOut className="w-4 h-4 mr-2" />
+                      Sign Out
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <Button className="bg-emerald-600 hover:bg-emerald-700 w-full">
+                  Book Consultation
+                </Button>
+              )}
             </nav>
           </div>
         )}

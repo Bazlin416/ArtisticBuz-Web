@@ -1,5 +1,37 @@
 import { BaldnessType } from '@/types/calculator';
 
+export type GenderPreference = 'neutral' | 'male' | 'female';
+
+export const baldnessTypeImages = {
+  neutral: {
+    1: '🧑',
+    2: '👤',
+    3: '🙂',
+    4: '😐',
+    5: '🙁',
+    6: '😕',
+    7: '😔',
+  },
+  male: {
+    1: '🧑',
+    2: '👨',
+    3: '🧔',
+    4: '👴',
+    5: '🧓',
+    6: '👨‍🦲',
+    7: '🧑‍🦲',
+  },
+  female: {
+    1: '👩',
+    2: '👩',
+    3: '👩‍🦱',
+    4: '👵',
+    5: '🧓',
+    6: '👩‍🦲',
+    7: '👩‍🦲',
+  },
+};
+
 export const baldnessTypes: BaldnessType[] = [
   {
     id: 1,
@@ -19,7 +51,7 @@ export const baldnessTypes: BaldnessType[] = [
     graftMin: 500,
     graftMax: 1200,
     description: 'Slight recession at the temples forming an M-shape hairline.',
-    image: '👨',
+    image: '👤',
   },
   {
     id: 3,
@@ -29,7 +61,7 @@ export const baldnessTypes: BaldnessType[] = [
     graftMin: 1800,
     graftMax: 2200,
     description: 'Receding hairline with deeper temporal loss and thinning.',
-    image: '🧔',
+    image: '🙂',
   },
   {
     id: 4,
@@ -39,7 +71,7 @@ export const baldnessTypes: BaldnessType[] = [
     graftMin: 2500,
     graftMax: 3000,
     description: 'Significant hair loss at the crown with pronounced frontal recession.',
-    image: '👴',
+    image: '😐',
   },
   {
     id: 5,
@@ -49,7 +81,7 @@ export const baldnessTypes: BaldnessType[] = [
     graftMin: 3500,
     graftMax: 4000,
     description: 'Large area of hair loss with a thin band of hair separating frontal and crown areas.',
-    image: '🧓',
+    image: '🙁',
   },
   {
     id: 6,
@@ -59,7 +91,7 @@ export const baldnessTypes: BaldnessType[] = [
     graftMin: 4500,
     graftMax: 5000,
     description: 'Extensive baldness with minimal hair remaining on the sides and back.',
-    image: '👨‍🦲',
+    image: '😕',
   },
   {
     id: 7,
@@ -69,7 +101,7 @@ export const baldnessTypes: BaldnessType[] = [
     graftMin: 5500,
     graftMax: 6500,
     description: 'Most severe form with only a narrow horseshoe-shaped band of hair remaining.',
-    image: '🧑‍🦲',
+    image: '😔',
   },
 ];
 
