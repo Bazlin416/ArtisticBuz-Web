@@ -1,15 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { getSupabaseClient } from '@/lib/supabase';
+import { createServiceRoleClient } from '@/lib/supabase-server';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: '2025-11-17.clover',
-});
-
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || '';
+export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
   try {
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
+      apiVersion: '2025-11-17.clover',
+    });
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || '';
     const body = await req.text();
     const signature = req.headers.get('stripe-signature');
 
@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const supabase = getSupabaseClient();
+    const supabase = createServiceRoleClient();
     if (!supabase) {
       return NextResponse.json(
         { error: 'Database not configured' },

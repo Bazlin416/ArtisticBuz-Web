@@ -1,10 +1,12 @@
 import { NextResponse } from 'next/server';
-import { getSupabaseClient } from '@/lib/supabase';
+import { createServiceRoleClient } from '@/lib/supabase-server';
+
+export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const supabase = getSupabaseClient();
+    const supabase = createServiceRoleClient();
 
     if (!supabase) {
       return NextResponse.json(

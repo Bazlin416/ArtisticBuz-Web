@@ -1,32 +1,19 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { getSupabaseClient } from '@/lib/supabase';
-import { cookies } from 'next/headers';
+import { createServerSupabaseClient } from '@/lib/supabase-server';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: '2025-11-17.clover',
-});
+export const dynamic = 'force-dynamic';
 
 export async function POST() {
   try {
-    const supabase = getSupabaseClient();
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
+      apiVersion: '2025-11-17.clover',
+    });
+    const supabase = createServerSupabaseClient();
     if (!supabase) {
       return NextResponse.json(
         { error: 'Database not configured' },
         { status: 503 }
-      );
-    }
-
-    const cookieStore = cookies();
-    const allCookies = cookieStore.getAll();
-    const authCookie = allCookies.find(cookie =>
-      cookie.name.includes('auth-token') || cookie.name.includes('supabase-auth-token')
-    );
-
-    if (!authCookie) {
-      return NextResponse.json(
-        { error: 'Not authenticated' },
-        { status: 401 }
       );
     }
 
