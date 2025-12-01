@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { loadStripe } from '@stripe/stripe-js';
 import {
   Dialog,
   DialogContent,
@@ -11,32 +10,75 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, Loader2 } from 'lucide-react';
+import { useAuth } from '@/contexts/auth-context';
 
 interface SubscriptionModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-const stripePromise = loadStripe(
-  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || ''
-);
-
 export function SubscriptionModal({ isOpen, onClose }: SubscriptionModalProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { session, loading: authLoading } = useAuth();
 
   const handleSubscribe = async () => {
     setLoading(true);
     setError(null);
 
     try {
-      const response = await fetch('/api/create-checkout-session', {
+      // Check if user is authenticated
+      if (!session) {
+        setError('Please log in to subscribe');
+        setLoading(false);
+        return;
+      }
+
+      console.log('User authenticated, user ID:', session.user.id);
+      console.log('Access token available:', !!session.access_token);
+
+      // Try without Authorization header first
+      let response = await fetch('/api/create-checkout-session', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'include',
       });
+
+      console.log('First attempt status:', response.status);
+
+      // If unauthorized, try with Authorization header
+      if (response.status === 401) {
+        console.log('First attempt failed with 401, trying with auth token...');
+        
+        response = await fetch('/api/create-checkout-session', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`,
+          },
+        });
+        
+        console.log('Second attempt status:', response.status);
+      }
+
+      // Handle response
+      if (response.status === 401) {
+        setError('Authentication failed. Please log in again.');
+        setLoading(false);
+        return;
+      }
+
+      if (!response.ok) {
+        let errorMessage = `HTTP error! status: ${response.status}`;
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorMessage;
+        } catch (e) {
+          // Couldn't parse JSON error
+        }
+        throw new Error(errorMessage);
+      }
 
       const data = await response.json();
 
@@ -47,16 +89,40 @@ export function SubscriptionModal({ isOpen, onClose }: SubscriptionModalProps) {
       }
 
       if (data.url) {
+        console.log('Redirecting to Stripe checkout:', data.url);
         window.location.href = data.url;
       } else {
-        setError('Failed to create checkout session');
-        setLoading(false);
+        throw new Error('No checkout URL received from server');
       }
-    } catch (err) {
-      setError('An unexpected error occurred');
+    } catch (err: any) {
+      console.error('Checkout error:', err);
+      
+      // User-friendly error messages
+      if (err.message.includes('Failed to fetch')) {
+        setError('Network error. Please check your connection and try again.');
+      } else if (err.message.includes('Already subscribed')) {
+        setError('You already have an active subscription.');
+      } else {
+        setError(err.message || 'An unexpected error occurred. Please try again.');
+      }
+      
       setLoading(false);
     }
   };
+
+  // Show loading state if auth is still loading
+  if (authLoading) {
+    return (
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="sm:max-w-[500px]">
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
+            <span className="ml-2 text-gray-600">Loading...</span>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -112,6 +178,12 @@ export function SubscriptionModal({ isOpen, onClose }: SubscriptionModalProps) {
             </div>
           </div>
 
+          {!session && (
+            <div className="text-sm text-amber-600 bg-amber-50 p-3 rounded-md">
+              Please log in to subscribe to the hair calculator
+            </div>
+          )}
+
           {error && (
             <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md">
               {error}
@@ -122,13 +194,15 @@ export function SubscriptionModal({ isOpen, onClose }: SubscriptionModalProps) {
             <Button
               onClick={handleSubscribe}
               className="w-full bg-emerald-600 hover:bg-emerald-700 text-lg py-6"
-              disabled={loading}
+              disabled={loading || !session}
             >
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                   Processing...
                 </>
+              ) : !session ? (
+                'Please Log In to Subscribe'
               ) : (
                 'Subscribe Now - $1'
               )}
