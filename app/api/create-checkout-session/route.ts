@@ -20,8 +20,9 @@ export async function POST() {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
     if (authError || !user) {
+      console.error('Auth error in checkout:', { authError, hasUser: !!user });
       return NextResponse.json(
-        { error: 'Not authenticated' },
+        { error: 'Not authenticated', details: authError?.message },
         { status: 401 }
       );
     }
