@@ -38,6 +38,14 @@ export function SubscriptionModal({ isOpen, onClose }: SubscriptionModalProps) {
         credentials: 'include',
       });
 
+      if (!response.ok) {
+        const data = await response.json();
+        console.error('Checkout error response:', { status: response.status, data });
+        setError(data.error || `Error: ${response.status}`);
+        setLoading(false);
+        return;
+      }
+
       const data = await response.json();
 
       if (data.error) {

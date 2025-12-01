@@ -13,9 +13,16 @@ export function createServerSupabaseClient() {
 
   return createClient(supabaseUrl, supabaseAnonKey, {
     auth: {
+      persistSession: true,
+      detectSessionInUrl: false,
       storage: {
         getItem: (key: string) => {
-          return cookieStore.get(key)?.value ?? null;
+          try {
+            const value = cookieStore.get(key)?.value;
+            return value ?? null;
+          } catch (error) {
+            return null;
+          }
         },
         setItem: (key: string, value: string) => {
           try {
@@ -23,6 +30,7 @@ export function createServerSupabaseClient() {
               httpOnly: true,
               sameSite: 'lax',
               secure: process.env.NODE_ENV === 'production',
+              maxAge: 60 * 60 * 24 * 365,
             });
           } catch (error) {
           }
