@@ -21,6 +21,9 @@ export function createServerSupabaseClient() {
           } catch (error) {
             // The `setAll` method was called from a Server Component.
             // This can be ignored if you have middleware refreshing user sessions.
+
+            // Uncomment if you need to debug:
+            console.warn('Supabase setAll cookie write blocked:', error);
           }
         },
       },
