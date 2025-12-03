@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react"; // Add useEffect import
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { BaldnessTypeGrid } from "@/components/calculator/baldness-type-grid";
@@ -23,6 +23,51 @@ export default function Home() {
   const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
   const [genderPreference, setGenderPreference] = useState<GenderPreference>('neutral');
   const { user, isSubscribed, loading } = useAuth();
+  const [country, setCountry] = useState<string>('default');
+  const [detectedCurrency, setDetectedCurrency] = useState<string>('USD');
+  const [detectedAmount, setDetectedAmount] = useState<string>('$1.00');
+
+  // Move the useEffect hook here, after all useState declarations
+  useEffect(() => {
+    detectCountry();
+  }, []);
+
+  const detectCountry = async () => {
+    try {
+      const response = await fetch('https://ipapi.co/json/');
+      if (response.ok) {
+        const data = await response.json();
+        const detectedCountry = data.country_code || 'default';
+        setCountry(detectedCountry);
+
+        const currencyInfo = getCurrencyInfo(detectedCountry);
+        setDetectedCurrency(currencyInfo.currency);
+        setDetectedAmount(currencyInfo.display);
+
+        console.log('Detected country:', detectedCountry, 'Currency:', currencyInfo.currency);
+      }
+    } catch (err) {
+      console.error('Error detecting country:', err);
+    }
+  };
+
+  const getCurrencyInfo = (countryCode: string): { currency: string; display: string } => {
+    const currencyMap: Record<string, { currency: string; display: string }> = {
+      'US': { currency: 'USD', display: '$1.00' },
+      'KE': { currency: 'KES', display: 'KSH 130' },
+      'GB': { currency: 'GBP', display: '£0.80' },
+      'NG': { currency: 'NGN', display: '₦1,600' },
+      'ZA': { currency: 'ZAR', display: 'R19' },
+      'default': { currency: 'USD', display: '$1.00' }
+    };
+
+    const euCountries = ['DE', 'FR', 'IT', 'ES', 'NL', 'BE', 'AT', 'IE', 'PT', 'FI', 'GR'];
+    if (euCountries.includes(countryCode)) {
+      return { currency: 'EUR', display: '€0.95' };
+    }
+
+    return currencyMap[countryCode] || currencyMap['default'];
+  };
 
   const handleSelectType = (type: BaldnessType) => {
     if (!user) {
@@ -172,13 +217,13 @@ export default function Home() {
                       Subscribe to Access Results
                     </h3>
                     <p className="text-gray-600 mb-4">
-                      Get lifetime access to the calculator for just $1
+                      Get lifetime access to the calculator for just {detectedAmount}
                     </p>
                     <Button
                       onClick={() => setIsSubscriptionModalOpen(true)}
                       className="bg-amber-600 hover:bg-amber-700"
                     >
-                      Subscribe Now - $1
+                      Subscribe Now - {detectedAmount}
                     </Button>
                   </div>
                 )}

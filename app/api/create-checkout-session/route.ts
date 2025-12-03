@@ -4,15 +4,30 @@ import { createServerSupabaseClient } from '@/lib/supabase-server';
 
 export const dynamic = 'force-dynamic';
 
-// Currency mapping based on country
+// First, define the helper function
+function getAmountInSmallestUnit(currency: string, amount: number): number {
+  // Currencies without minor units (they use the amount as-is)
+  const zeroDecimalCurrencies = ['JPY', 'KRW', 'VND', 'CLP', 'ISK', 'PYG'];
+  
+  const currencyCode = currency.toUpperCase();
+  
+  if (zeroDecimalCurrencies.includes(currencyCode)) {
+    return amount; // Already in correct unit
+  }
+  
+  // For most currencies, multiply by 100 to get smallest unit
+  return Math.round(amount * 100);
+}
+
+// Updated currency mapping using the helper function
 const currencyMap: Record<string, { currency: string; amount: number }> = {
-  'US': { currency: 'usd', amount: 100 }, // $1
-  'KE': { currency: 'kes', amount: 130 }, // 130 KES (~$1)
-  'GB': { currency: 'gbp', amount: 80 },  // £0.80
-  'EU': { currency: 'eur', amount: 95 },  // €0.95
-  'NG': { currency: 'ngn', amount: 1600 }, // 1600 NGN (~$1)
-  'ZA': { currency: 'zar', amount: 19 },  // 19 ZAR (~$1)
-  'default': { currency: 'usd', amount: 100 }
+  'US': { currency: 'usd', amount: getAmountInSmallestUnit('usd', 1) },        // $1.00 → 100 cents
+  'KE': { currency: 'kes', amount: getAmountInSmallestUnit('kes', 130) },     // 130 KES → 13000 cents
+  'GB': { currency: 'gbp', amount: getAmountInSmallestUnit('gbp', 0.80) },    // £0.80 → 80 pence
+  'EU': { currency: 'eur', amount: getAmountInSmallestUnit('eur', 0.95) },    // €0.95 → 95 cents
+  'NG': { currency: 'ngn', amount: getAmountInSmallestUnit('ngn', 1600) },    // 1600 NGN → 160000 kobo
+  'ZA': { currency: 'zar', amount: getAmountInSmallestUnit('zar', 19) },      // 19 ZAR → 1900 cents
+  'default': { currency: 'usd', amount: getAmountInSmallestUnit('usd', 1) }   // $1.00 → 100 cents
 };
 
 export async function POST(request: Request) {
