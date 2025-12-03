@@ -51,7 +51,7 @@ export function Header() {
               <Heart className="w-6 h-6 text-white fill-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-gray-900">Artisticbuz</h1>
+              <h1 className="text-xl font-bold text-gray-900">ArtisticBuz</h1>
               <p className="text-xs text-gray-500">Restore Your Confidence</p>
             </div>
           </div>

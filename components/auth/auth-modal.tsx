@@ -90,7 +90,7 @@ export function AuthModal({ isOpen, onClose, defaultTab = 'signin' }: AuthModalP
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Welcome to Artisticbuz</DialogTitle>
+          <DialogTitle>Welcome to ArtisticBuz</DialogTitle>
           <DialogDescription>
             Sign in or create an account to access the hair calculator
           </DialogDescription>

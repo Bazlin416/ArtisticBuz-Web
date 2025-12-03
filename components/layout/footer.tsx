@@ -11,7 +11,7 @@ export function Footer() {
                 <Heart className="w-6 h-6 text-white fill-white" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-white">Artisticbuz</h2>
+                <h2 className="text-xl font-bold text-white">ArtisticBuz</h2>
                 <p className="text-xs text-gray-400">Restore Your Confidence</p>
               </div>
             </div>
@@ -87,7 +87,7 @@ export function Footer() {
         <div className="border-t border-gray-800 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-sm text-gray-400">
-              &copy; 2025 Artisticbuz. All rights reserved.
+              &copy; 2025 ArtisticBuz. All rights reserved.
             </p>
             <div className="flex gap-6">
               <a href="#" className="text-sm hover:text-emerald-400 transition-colors">Privacy Policy</a>

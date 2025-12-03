@@ -6,7 +6,7 @@ import { AuthProvider } from '@/contexts/auth-context';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Artisticbuz - Hair Graft Calculator',
+  title: 'ArtisticBuz - Hair Graft Calculator',
   description: 'Professional hair transplant calculator. Estimate grafts needed for natural hair restoration.',
 };
 
