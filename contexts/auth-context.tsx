@@ -46,6 +46,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsSubscribed(data.status === 'active' || data.status === 'trialing');
   };
 
+  console.log('AuthProvider render:', {isSubscribed });
+
   useEffect(() => {
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {

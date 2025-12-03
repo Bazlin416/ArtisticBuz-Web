@@ -21,11 +21,28 @@ export default function Home() {
   const [isConsultationModalOpen, setIsConsultationModalOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
-  const [genderPreference, setGenderPreference] = useState<GenderPreference>('neutral');
+  const [genderPreference, setGenderPreference] =
+    useState<GenderPreference>("neutral");
   const { user, isSubscribed, loading } = useAuth();
-  const [country, setCountry] = useState<string>('default');
-  const [detectedCurrency, setDetectedCurrency] = useState<string>('USD');
-  const [detectedAmount, setDetectedAmount] = useState<string>('$1.00');
+  const [country, setCountry] = useState<string>("default");
+  const [detectedCurrency, setDetectedCurrency] = useState<string>("USD");
+  const [detectedAmount, setDetectedAmount] = useState<string>("$1.00");
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  // Auto-slide carousel
+  useEffect(() => {
+    const slides = [
+      "/Patient-Images-ArtisticClinic-Nairobi-11-25-2025_12_36_AM.png",
+      "/female.png",
+      "/mzungu.jpg",
+    ];
+
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % slides.length);
+    }, 4000); // Change slide every 4 seconds
+
+    return () => clearInterval(interval);
+  }, []);
 
   // Move the useEffect hook here, after all useState declarations
   useEffect(() => {
@@ -34,39 +51,58 @@ export default function Home() {
 
   const detectCountry = async () => {
     try {
-      const response = await fetch('https://ipapi.co/json/');
+      const response = await fetch("https://ipapi.co/json/");
       if (response.ok) {
         const data = await response.json();
-        const detectedCountry = data.country_code || 'default';
+        const detectedCountry = data.country_code || "default";
         setCountry(detectedCountry);
 
         const currencyInfo = getCurrencyInfo(detectedCountry);
         setDetectedCurrency(currencyInfo.currency);
         setDetectedAmount(currencyInfo.display);
 
-        console.log('Detected country:', detectedCountry, 'Currency:', currencyInfo.currency);
+        console.log(
+          "Detected country:",
+          detectedCountry,
+          "Currency:",
+          currencyInfo.currency
+        );
       }
     } catch (err) {
-      console.error('Error detecting country:', err);
+      console.error("Error detecting country:", err);
     }
   };
 
-  const getCurrencyInfo = (countryCode: string): { currency: string; display: string } => {
+  const getCurrencyInfo = (
+    countryCode: string
+  ): { currency: string; display: string } => {
     const currencyMap: Record<string, { currency: string; display: string }> = {
-      'US': { currency: 'USD', display: '$1.00' },
-      'KE': { currency: 'KES', display: 'KSH 130' },
-      'GB': { currency: 'GBP', display: '£0.80' },
-      'NG': { currency: 'NGN', display: '₦1,600' },
-      'ZA': { currency: 'ZAR', display: 'R19' },
-      'default': { currency: 'USD', display: '$1.00' }
+      US: { currency: "USD", display: "$1.00" },
+      KE: { currency: "KES", display: "KSH 130" },
+      GB: { currency: "GBP", display: "£0.80" },
+      NG: { currency: "NGN", display: "₦1,600" },
+      ZA: { currency: "ZAR", display: "R19" },
+      default: { currency: "USD", display: "$1.00" },
     };
 
-    const euCountries = ['DE', 'FR', 'IT', 'ES', 'NL', 'BE', 'AT', 'IE', 'PT', 'FI', 'GR'];
+    const euCountries = [
+      "DE",
+      "FR",
+      "IT",
+      "ES",
+      "NL",
+      "BE",
+      "AT",
+      "IE",
+      "PT",
+      "FI",
+      "GR",
+    ];
     if (euCountries.includes(countryCode)) {
-      return { currency: 'EUR', display: '€0.95' };
+      return { currency: "EUR", display: "€0.95" };
     }
 
-    return currencyMap[countryCode] || currencyMap['default'];
+    return currencyMap[countryCode] || currencyMap["default"];
   };
 
   const handleSelectType = (type: BaldnessType) => {
@@ -93,46 +129,99 @@ export default function Home() {
       <Header />
 
       <main className="pt-20">
-        <section className="relative bg-gradient-to-br from-emerald-600 via-teal-600 to-emerald-700 text-white py-16 md:py-24 overflow-hidden">
+        <section className="relative bg-gradient-to-br from-emerald-600 via-teal-600 to-emerald-700 text-white py-12 md:py-16 lg:py-24 overflow-hidden">
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjEiIHN0cm9rZS13aWR0aD0iMSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNncmlkKSIvPjwvc3ZnPg==')] opacity-20"></div>
 
           <div className="container mx-auto px-4 relative z-10">
-            <div className="flex flex-col lg:flex-row items-center justify-between gap-12 max-w-7xl mx-auto">
-              <div className="flex-1 text-center lg:text-left">
-                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
+            <div className="flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-12 max-w-7xl mx-auto">
+              {/* Left Content */}
+              <div className="flex-1 text-center lg:text-left order-2 lg:order-1">
+                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 leading-tight">
                   Hair Graft Calculator
                 </h1>
-                <p className="text-lg md:text-xl lg:text-2xl text-emerald-50 mb-8 leading-relaxed max-w-2xl">
+                <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-emerald-50 mb-6 sm:mb-8 leading-relaxed max-w-2xl">
                   Estimate how many hair grafts you need for a natural hair
-                  transplant. Our easy-to-use hair transplant graft
-                  calculator helps you plan your hair restoration journey with
-                  confidence.
+                  transplant. Our easy-to-use hair transplant graft calculator
+                  helps you plan your hair restoration journey with confidence.
                 </p>
 
                 <button
                   onClick={() => setIsConsultationModalOpen(true)}
-                  className="bg-white text-emerald-700 hover:bg-emerald-50 px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl mb-12 lg:mb-0">
+                  className="bg-white text-emerald-700 hover:bg-emerald-50 px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-semibold text-base sm:text-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl mb-8 lg:mb-0 w-full sm:w-auto"
+                >
                   Get a Consultation
                 </button>
               </div>
 
-              <div className="flex-1 flex justify-center lg:justify-end">
-                <div className="relative max-w-md lg:max-w-lg">
-                  <div className="relative rounded-2xl overflow-hidden shadow-2xl border-4 border-white/20">
-                    <img
-                      src="/Patient-Images-ArtisticClinic-Nairobi-11-25-2025_12_36_AM.png"
-                      alt="Patient before and after hair transplant results from Artistic Clinic Nairobi"
-                      className="w-full h-auto object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-emerald-900/30 to-transparent"></div>
+              {/* Right Content - Carousel */}
+              <div className="flex-1 flex justify-center lg:justify-end w-full order-1 lg:order-2 mb-8 lg:mb-0">
+                <div className="relative w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl xl:max-w-2xl">
+                  {/* Carousel Container */}
+                  <div className="relative rounded-2xl overflow-hidden shadow-2xl border-4 border-white/20 h-48 sm:h-56 md:h-64 lg:h-80 xl:h-96 w-full">
+                    {/* Images */}
+                    {[
+                      "/Patient-Images-ArtisticClinic-Nairobi-11-25-2025_12_36_AM.png",
+                      "/female.png",
+                      "/mzungu.jpg",
+                    ].map((src, index) => (
+                      <div
+                        key={index}
+                        className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out ${
+                          index === currentSlide ? "opacity-100" : "opacity-0"
+                        }`}
+                      >
+                        <img
+                          src={src}
+                          alt={`Hair transplant result ${index + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-emerald-900/30 to-transparent"></div>
+                      </div>
+                    ))}
+
+                    {/* Navigation Dots */}
+                    <div className="absolute bottom-3 sm:bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
+                      {[0, 1, 2].map((index) => (
+                        <button
+                          key={index}
+                          onClick={() => setCurrentSlide(index)}
+                          className={`w-2 h-2 rounded-full transition-all duration-300 cursor-pointer ${
+                            index === currentSlide
+                              ? "bg-white w-3 sm:w-4"
+                              : "bg-white/50 hover:bg-white/80"
+                          }`}
+                          aria-label={`Go to slide ${index + 1}`}
+                        />
+                      ))}
+                    </div>
+
+                    {/* Navigation Arrows - Hidden on small screens */}
+                    <button
+                      onClick={() =>
+                        setCurrentSlide((prev) => (prev - 1 + 3) % 3)
+                      }
+                      className="hidden sm:block absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white p-2 rounded-full transition-colors z-10"
+                      aria-label="Previous slide"
+                    >
+                      ‹
+                    </button>
+                    <button
+                      onClick={() => setCurrentSlide((prev) => (prev + 1) % 3)}
+                      className="hidden sm:block absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white p-2 rounded-full transition-colors z-10"
+                      aria-label="Next slide"
+                    >
+                      ›
+                    </button>
                   </div>
 
-                  <div className="absolute -bottom-4 -right-4 bg-white text-emerald-700 px-6 py-3 rounded-xl shadow-2xl font-bold text-sm">
+                  {/* "Natural Results" badge */}
+                  <div className="absolute -bottom-3 -right-3 sm:-bottom-4 sm:-right-4 bg-white text-emerald-700 px-3 sm:px-4 py-1 sm:py-2 rounded-lg sm:rounded-xl shadow-xl font-bold text-xs sm:text-sm z-20 whitespace-nowrap">
                     Natural Results
                   </div>
 
-                  <div className="absolute -top-4 -left-4 w-8 h-8 bg-emerald-300 rounded-full opacity-60"></div>
-                  <div className="absolute -bottom-6 -left-6 w-12 h-12 bg-teal-400 rounded-full opacity-40"></div>
+                  {/* Decorative circles */}
+                  <div className="absolute -top-3 -left-3 sm:-top-4 sm:-left-4 w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 bg-emerald-300 rounded-full opacity-60"></div>
+                  <div className="absolute -bottom-4 -left-4 sm:-bottom-6 sm:-left-6 w-8 h-8 sm:w-10 sm:h-10 md:w-14 md:h-14 bg-teal-400 rounded-full opacity-40"></div>
                 </div>
               </div>
             </div>
@@ -199,7 +288,8 @@ export default function Home() {
                       Sign In to Access Calculator
                     </h3>
                     <p className="text-gray-600 mb-4">
-                      Create an account or sign in to use our professional hair graft calculator
+                      Create an account or sign in to use our professional hair
+                      graft calculator
                     </p>
                     <Button
                       onClick={() => setIsAuthModalOpen(true)}
@@ -217,7 +307,8 @@ export default function Home() {
                       Subscribe to Access Results
                     </h3>
                     <p className="text-gray-600 mb-4">
-                      Get lifetime access to the calculator for just {detectedAmount}
+                      Get lifetime access to the calculator for just{" "}
+                      {detectedAmount}
                     </p>
                     <Button
                       onClick={() => setIsSubscriptionModalOpen(true)}
@@ -231,31 +322,31 @@ export default function Home() {
                 {user && isSubscribed && (
                   <div className="flex justify-center gap-4 mb-8">
                     <button
-                      onClick={() => setGenderPreference('neutral')}
+                      onClick={() => setGenderPreference("neutral")}
                       className={`px-6 py-3 rounded-lg font-medium transition-all ${
-                        genderPreference === 'neutral'
-                          ? 'bg-emerald-600 text-white shadow-md'
-                          : 'bg-white text-gray-700 hover:bg-gray-100'
+                        genderPreference === "neutral"
+                          ? "bg-emerald-600 text-white shadow-md"
+                          : "bg-white text-gray-700 hover:bg-gray-100"
                       }`}
                     >
                       Neutral
                     </button>
                     <button
-                      onClick={() => setGenderPreference('male')}
+                      onClick={() => setGenderPreference("male")}
                       className={`px-6 py-3 rounded-lg font-medium transition-all ${
-                        genderPreference === 'male'
-                          ? 'bg-emerald-600 text-white shadow-md'
-                          : 'bg-white text-gray-700 hover:bg-gray-100'
+                        genderPreference === "male"
+                          ? "bg-emerald-600 text-white shadow-md"
+                          : "bg-white text-gray-700 hover:bg-gray-100"
                       }`}
                     >
                       Male
                     </button>
                     <button
-                      onClick={() => setGenderPreference('female')}
+                      onClick={() => setGenderPreference("female")}
                       className={`px-6 py-3 rounded-lg font-medium transition-all ${
-                        genderPreference === 'female'
-                          ? 'bg-emerald-600 text-white shadow-md'
-                          : 'bg-white text-gray-700 hover:bg-gray-100'
+                        genderPreference === "female"
+                          ? "bg-emerald-600 text-white shadow-md"
+                          : "bg-white text-gray-700 hover:bg-gray-100"
                       }`}
                     >
                       Female
