@@ -148,7 +148,7 @@ export function SubscriptionModal({ isOpen, onClose }: SubscriptionModalProps) {
         <DialogContent className="sm:max-w-[500px]">
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
-            <span className="ml-2 text-gray-600">Loading...</span>
+            <span className="ml-2 text-gray-600">Loading....</span>
           </div>
         </DialogContent>
       </Dialog>
