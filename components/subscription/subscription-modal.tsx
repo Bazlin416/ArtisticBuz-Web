@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -20,7 +20,53 @@ interface SubscriptionModalProps {
 export function SubscriptionModal({ isOpen, onClose }: SubscriptionModalProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { session, loading: authLoading } = useAuth();
+  const [country, setCountry] = useState<string>('default');
+  const [detectedCurrency, setDetectedCurrency] = useState<string>('USD');
+  const [detectedAmount, setDetectedAmount] = useState<string>('$1.00');
+  const { session, loading: authLoading, checkSubscription } = useAuth();
+
+  useEffect(() => {
+    if (isOpen) {
+      detectCountry();
+    }
+  }, [isOpen]);
+
+  const detectCountry = async () => {
+    try {
+      const response = await fetch('https://ipapi.co/json/');
+      if (response.ok) {
+        const data = await response.json();
+        const detectedCountry = data.country_code || 'default';
+        setCountry(detectedCountry);
+
+        const currencyInfo = getCurrencyInfo(detectedCountry);
+        setDetectedCurrency(currencyInfo.currency);
+        setDetectedAmount(currencyInfo.display);
+
+        console.log('Detected country:', detectedCountry, 'Currency:', currencyInfo.currency);
+      }
+    } catch (err) {
+      console.error('Error detecting country:', err);
+    }
+  };
+
+  const getCurrencyInfo = (countryCode: string): { currency: string; display: string } => {
+    const currencyMap: Record<string, { currency: string; display: string }> = {
+      'US': { currency: 'USD', display: '$1.00' },
+      'KE': { currency: 'KES', display: 'KSH 130' },
+      'GB': { currency: 'GBP', display: '£0.80' },
+      'NG': { currency: 'NGN', display: '₦1,600' },
+      'ZA': { currency: 'ZAR', display: 'R19' },
+      'default': { currency: 'USD', display: '$1.00' }
+    };
+
+    const euCountries = ['DE', 'FR', 'IT', 'ES', 'NL', 'BE', 'AT', 'IE', 'PT', 'FI', 'GR'];
+    if (euCountries.includes(countryCode)) {
+      return { currency: 'EUR', display: '€0.95' };
+    }
+
+    return currencyMap[countryCode] || currencyMap['default'];
+  };
 
   const handleSubscribe = async () => {
     setLoading(true);
@@ -35,32 +81,17 @@ export function SubscriptionModal({ isOpen, onClose }: SubscriptionModalProps) {
       }
 
       console.log('User authenticated, user ID:', session.user.id);
-      console.log('Access token available:', !!session.access_token);
+      console.log('Creating checkout for country:', country);
 
-      // Try without Authorization header first
-      let response = await fetch('/api/create-checkout-session', {
+      const response = await fetch('/api/create-checkout-session', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
+        body: JSON.stringify({ country }),
       });
 
-      console.log('First attempt status:', response.status);
-
-      // If unauthorized, try with Authorization header
-      if (response.status === 401) {
-        console.log('First attempt failed with 401, trying with auth token...');
-        
-        response = await fetch('/api/create-checkout-session', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${session.access_token}`,
-          },
-        });
-        
-        console.log('Second attempt status:', response.status);
-      }
+      console.log('Checkout response status:', response.status);
 
       // Handle response
       if (response.status === 401) {
@@ -139,9 +170,10 @@ export function SubscriptionModal({ isOpen, onClose }: SubscriptionModalProps) {
             <div className="text-center mb-4">
               <p className="text-sm text-gray-600 mb-2">One-time payment</p>
               <div className="flex items-center justify-center gap-2">
-                <span className="text-5xl font-bold text-emerald-600">$1</span>
+                <span className="text-5xl font-bold text-emerald-600">{detectedAmount}</span>
               </div>
-              <p className="text-sm text-gray-500 mt-2">Lifetime access</p>
+              <p className="text-sm text-gray-500 mt-2">14 days access</p>
+              <p className="text-xs text-gray-400 mt-1">Currency: {detectedCurrency}</p>
             </div>
 
             <div className="space-y-3 mt-6">
@@ -204,7 +236,7 @@ export function SubscriptionModal({ isOpen, onClose }: SubscriptionModalProps) {
               ) : !session ? (
                 'Please Log In to Subscribe'
               ) : (
-                'Subscribe Now - $1'
+                `Subscribe Now - ${detectedAmount}`
               )}
             </Button>
 

@@ -12,8 +12,18 @@ export default function SuccessPage() {
   const { checkSubscription } = useAuth();
 
   useEffect(() => {
-    checkSubscription();
-  }, []);
+    const forceCheck = async () => {
+      console.log('[SUCCESS] Checking subscription status...');
+      await checkSubscription();
+
+      setTimeout(async () => {
+        console.log('[SUCCESS] Rechecking subscription status...');
+        await checkSubscription();
+      }, 2000);
+    };
+
+    forceCheck();
+  }, [checkSubscription]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-50 flex items-center justify-center p-4">
@@ -27,7 +37,7 @@ export default function SuccessPage() {
         </h1>
 
         <p className="text-gray-600 mb-8">
-          Thank you for subscribing. You now have full access to the Hair Graft Calculator.
+          Thank you for subscribing. You now have 14 days access to the Hair Graft Calculator.
         </p>
 
         <div className="space-y-3">

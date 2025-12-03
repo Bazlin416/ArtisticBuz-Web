@@ -4,8 +4,33 @@ import { createServerSupabaseClient } from '@/lib/supabase-server';
 
 export const dynamic = 'force-dynamic';
 
-export async function POST() {
+// Currency mapping based on country
+const currencyMap: Record<string, { currency: string; amount: number }> = {
+  'US': { currency: 'usd', amount: 100 }, // $1
+  'KE': { currency: 'kes', amount: 130 }, // 130 KES (~$1)
+  'GB': { currency: 'gbp', amount: 80 },  // £0.80
+  'EU': { currency: 'eur', amount: 95 },  // €0.95
+  'NG': { currency: 'ngn', amount: 1600 }, // 1600 NGN (~$1)
+  'ZA': { currency: 'zar', amount: 19 },  // 19 ZAR (~$1)
+  'default': { currency: 'usd', amount: 100 }
+};
+
+export async function POST(request: Request) {
   try {
+    // Get country from request headers or body
+    let country = 'default';
+    try {
+      const body = await request.json();
+      country = body.country || 'default';
+    } catch {
+      // If no body, use default
+    }
+
+    // Determine currency and amount based on country
+    const { currency, amount } = currencyMap[country] || currencyMap['default'];
+
+    console.log('[CHECKOUT] Creating session for country:', country, 'currency:', currency, 'amount:', amount);
+
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
       apiVersion: '2025-11-17.clover',
     });
@@ -46,12 +71,12 @@ export async function POST() {
       line_items: [
         {
           price_data: {
-            currency: 'usd',
+            currency: currency,
             product_data: {
-              name: 'Hair Calculator Access',
-              description: 'Lifetime access to professional hair transplant calculator',
+              name: 'Hair Calculator Access - 14 Days',
+              description: '14-day access to professional hair transplant calculator',
             },
-            unit_amount: 100,
+            unit_amount: amount,
           },
           quantity: 1,
         },
