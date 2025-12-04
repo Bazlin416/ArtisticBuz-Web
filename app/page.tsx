@@ -77,12 +77,12 @@ export default function Home() {
     countryCode: string
   ): { currency: string; display: string } => {
     const currencyMap: Record<string, { currency: string; display: string }> = {
-      US: { currency: "USD", display: "$1.00" },
-      KE: { currency: "KES", display: "KSH 130" },
-      GB: { currency: "GBP", display: "£0.80" },
-      NG: { currency: "NGN", display: "₦1,600" },
-      ZA: { currency: "ZAR", display: "R19" },
-      default: { currency: "USD", display: "$1.00" },
+      US: { currency: "USD", display: "$4.99" },
+      KE: { currency: "KES", display: "KSH 649" },
+      GB: { currency: "GBP", display: "£3.99" },
+      NG: { currency: "NGN", display: "₦7,984" },
+      ZA: { currency: "ZAR", display: "R95" },
+      default: { currency: "USD", display: "$4.99" },
     };
 
     const euCountries = [
@@ -99,7 +99,7 @@ export default function Home() {
       "GR",
     ];
     if (euCountries.includes(countryCode)) {
-      return { currency: "EUR", display: "€0.95" };
+      return { currency: "EUR", display: "€4.75" };
     }
 
     return currencyMap[countryCode] || currencyMap["default"];

@@ -1,16 +1,16 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { CheckCircle, Loader2 } from 'lucide-react';
-import { useAuth } from '@/contexts/auth-context';
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { CheckCircle, Loader2 } from "lucide-react";
+import { useAuth } from "@/contexts/auth-context";
 
 interface SubscriptionModalProps {
   isOpen: boolean;
@@ -20,9 +20,9 @@ interface SubscriptionModalProps {
 export function SubscriptionModal({ isOpen, onClose }: SubscriptionModalProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [country, setCountry] = useState<string>('default');
-  const [detectedCurrency, setDetectedCurrency] = useState<string>('USD');
-  const [detectedAmount, setDetectedAmount] = useState<string>('$1.00');
+  const [country, setCountry] = useState<string>("default");
+  const [detectedCurrency, setDetectedCurrency] = useState<string>("USD");
+  const [detectedAmount, setDetectedAmount] = useState<string>("$1.00");
   const { session, loading: authLoading, checkSubscription } = useAuth();
 
   useEffect(() => {
@@ -33,39 +33,58 @@ export function SubscriptionModal({ isOpen, onClose }: SubscriptionModalProps) {
 
   const detectCountry = async () => {
     try {
-      const response = await fetch('https://ipapi.co/json/');
+      const response = await fetch("https://ipapi.co/json/");
       if (response.ok) {
         const data = await response.json();
-        const detectedCountry = data.country_code || 'default';
+        const detectedCountry = data.country_code || "default";
         setCountry(detectedCountry);
 
         const currencyInfo = getCurrencyInfo(detectedCountry);
         setDetectedCurrency(currencyInfo.currency);
         setDetectedAmount(currencyInfo.display);
 
-        console.log('Detected country:', detectedCountry, 'Currency:', currencyInfo.currency);
+        console.log(
+          "Detected country:",
+          detectedCountry,
+          "Currency:",
+          currencyInfo.currency
+        );
       }
     } catch (err) {
-      console.error('Error detecting country:', err);
+      console.error("Error detecting country:", err);
     }
   };
 
-  const getCurrencyInfo = (countryCode: string): { currency: string; display: string } => {
+  const getCurrencyInfo = (
+    countryCode: string
+  ): { currency: string; display: string } => {
     const currencyMap: Record<string, { currency: string; display: string }> = {
-      'US': { currency: 'USD', display: '$1.00' },
-      'KE': { currency: 'KES', display: 'KSH 130' },
-      'GB': { currency: 'GBP', display: '£0.80' },
-      'NG': { currency: 'NGN', display: '₦1,600' },
-      'ZA': { currency: 'ZAR', display: 'R19' },
-      'default': { currency: 'USD', display: '$1.00' }
+      US: { currency: "USD", display: "$4.99" },
+      KE: { currency: "KES", display: "KSH 649" },
+      GB: { currency: "GBP", display: "£3.99" },
+      NG: { currency: "NGN", display: "₦7,984" },
+      ZA: { currency: "ZAR", display: "R95" },
+      default: { currency: "USD", display: "$4.99" },
     };
 
-    const euCountries = ['DE', 'FR', 'IT', 'ES', 'NL', 'BE', 'AT', 'IE', 'PT', 'FI', 'GR'];
+    const euCountries = [
+      "DE",
+      "FR",
+      "IT",
+      "ES",
+      "NL",
+      "BE",
+      "AT",
+      "IE",
+      "PT",
+      "FI",
+      "GR",
+    ];
     if (euCountries.includes(countryCode)) {
-      return { currency: 'EUR', display: '€0.95' };
+      return { currency: "EUR", display: "€4.75" };
     }
 
-    return currencyMap[countryCode] || currencyMap['default'];
+    return currencyMap[countryCode] || currencyMap["default"];
   };
 
   const handleSubscribe = async () => {
@@ -75,27 +94,27 @@ export function SubscriptionModal({ isOpen, onClose }: SubscriptionModalProps) {
     try {
       // Check if user is authenticated
       if (!session) {
-        setError('Please log in to subscribe');
+        setError("Please log in to subscribe");
         setLoading(false);
         return;
       }
 
-      console.log('User authenticated, user ID:', session.user.id);
-      console.log('Creating checkout for country:', country);
+      console.log("User authenticated, user ID:", session.user.id);
+      console.log("Creating checkout for country:", country);
 
-      const response = await fetch('/api/create-checkout-session', {
-        method: 'POST',
+      const response = await fetch("/api/create-checkout-session", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ country }),
       });
 
-      console.log('Checkout response status:', response.status);
+      console.log("Checkout response status:", response.status);
 
       // Handle response
       if (response.status === 401) {
-        setError('Authentication failed. Please log in again.');
+        setError("Authentication failed. Please log in again.");
         setLoading(false);
         return;
       }
@@ -120,23 +139,25 @@ export function SubscriptionModal({ isOpen, onClose }: SubscriptionModalProps) {
       }
 
       if (data.url) {
-        console.log('Redirecting to Stripe checkout:', data.url);
+        console.log("Redirecting to Stripe checkout:", data.url);
         window.location.href = data.url;
       } else {
-        throw new Error('No checkout URL received from server');
+        throw new Error("No checkout URL received from server");
       }
     } catch (err: any) {
-      console.error('Checkout error:', err);
-      
+      console.error("Checkout error:", err);
+
       // User-friendly error messages
-      if (err.message.includes('Failed to fetch')) {
-        setError('Network error. Please check your connection and try again.');
-      } else if (err.message.includes('Already subscribed')) {
-        setError('You already have an active subscription.');
+      if (err.message.includes("Failed to fetch")) {
+        setError("Network error. Please check your connection and try again.");
+      } else if (err.message.includes("Already subscribed")) {
+        setError("You already have an active subscription.");
       } else {
-        setError(err.message || 'An unexpected error occurred. Please try again.');
+        setError(
+          err.message || "An unexpected error occurred. Please try again."
+        );
       }
-      
+
       setLoading(false);
     }
   };
@@ -159,7 +180,9 @@ export function SubscriptionModal({ isOpen, onClose }: SubscriptionModalProps) {
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle className="text-2xl">Subscribe to Access Hair Calculator</DialogTitle>
+          <DialogTitle className="text-2xl">
+            Subscribe to Access Hair Calculator
+          </DialogTitle>
           <DialogDescription>
             Get instant access to our professional hair transplant calculator
           </DialogDescription>
@@ -170,10 +193,14 @@ export function SubscriptionModal({ isOpen, onClose }: SubscriptionModalProps) {
             <div className="text-center mb-4">
               <p className="text-sm text-gray-600 mb-2">One-time payment</p>
               <div className="flex items-center justify-center gap-2">
-                <span className="text-5xl font-bold text-emerald-600">{detectedAmount}</span>
+                <span className="text-5xl font-bold text-emerald-600">
+                  {detectedAmount}
+                </span>
               </div>
               <p className="text-sm text-gray-500 mt-2">14 days access</p>
-              <p className="text-xs text-gray-400 mt-1">Currency: {detectedCurrency}</p>
+              <p className="text-xs text-gray-400 mt-1">
+                Currency: {detectedCurrency}
+              </p>
             </div>
 
             <div className="space-y-3 mt-6">
@@ -228,14 +255,15 @@ export function SubscriptionModal({ isOpen, onClose }: SubscriptionModalProps) {
                   Processing...
                 </>
               ) : !session ? (
-                'Please Log In to Subscribe'
+                "Please Log In to Subscribe"
               ) : (
                 `Subscribe Now - ${detectedAmount}`
               )}
             </Button>
 
             <p className="text-xs text-center text-gray-500">
-              Secure payment processed by Stripe. One-time payment, no recurring charges.
+              Secure payment processed by Stripe. One-time payment, no recurring
+              charges.
             </p>
           </div>
         </div>

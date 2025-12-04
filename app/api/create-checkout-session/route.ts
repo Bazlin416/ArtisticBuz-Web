@@ -21,13 +21,13 @@ function getAmountInSmallestUnit(currency: string, amount: number): number {
 
 // Updated currency mapping using the helper function
 const currencyMap: Record<string, { currency: string; amount: number }> = {
-  'US': { currency: 'usd', amount: getAmountInSmallestUnit('usd', 1) },        // $1.00 → 100 cents
-  'KE': { currency: 'kes', amount: getAmountInSmallestUnit('kes', 130) },     // 130 KES → 13000 cents
-  'GB': { currency: 'gbp', amount: getAmountInSmallestUnit('gbp', 0.80) },    // £0.80 → 80 pence
-  'EU': { currency: 'eur', amount: getAmountInSmallestUnit('eur', 0.95) },    // €0.95 → 95 cents
-  'NG': { currency: 'ngn', amount: getAmountInSmallestUnit('ngn', 1600) },    // 1600 NGN → 160000 kobo
-  'ZA': { currency: 'zar', amount: getAmountInSmallestUnit('zar', 19) },      // 19 ZAR → 1900 cents
-  'default': { currency: 'usd', amount: getAmountInSmallestUnit('usd', 1) }   // $1.00 → 100 cents
+  'US': { currency: 'usd', amount: getAmountInSmallestUnit('usd', 4.99) },        // $4.99 → 499 cents
+  'KE': { currency: 'kes', amount: getAmountInSmallestUnit('kes', 649) },        // 649 KES → 64900 cents
+  'GB': { currency: 'gbp', amount: getAmountInSmallestUnit('gbp', 3.99) },       // £3.99 → 399 pence
+  'EU': { currency: 'eur', amount: getAmountInSmallestUnit('eur', 4.75) },       // €4.75 → 475 cents
+  'NG': { currency: 'ngn', amount: getAmountInSmallestUnit('ngn', 7984) },       // 7,984 NGN → 798400 kobo
+  'ZA': { currency: 'zar', amount: getAmountInSmallestUnit('zar', 95) },         // 95 ZAR → 9500 cents
+  'default': { currency: 'usd', amount: getAmountInSmallestUnit('usd', 4.99) }   // $4.99 → 499 cents
 };
 
 export async function POST(request: Request) {
