@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
+import { createServerSupabaseClient } from '@/lib/supabase-server'; // Use the server client
 
 export const dynamic = 'force-dynamic';
 
@@ -31,14 +32,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const supabase = (() => {
-      const { createClient } = require('@supabase/supabase-js');
-      return createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-        process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-      );
-    })();
-
+    // Use the server Supabase client
+    const supabase = createServerSupabaseClient();
     if (!supabase) {
       return NextResponse.json(
         { error: 'Database not configured' },
@@ -60,65 +55,52 @@ export async function POST(req: NextRequest) {
 
         console.log('[WEBHOOK] Processing subscription for user:', userId);
 
+        const subscriptionData = {
+          user_id: userId,
+          stripe_customer_id: session.customer as string,
+          status: 'active',
+          current_period_start: new Date().toISOString(),
+          current_period_end: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
+          updated_at: new Date().toISOString(),
+        };
+
         const { data: existingSubscription } = await supabase
           .from('subscriptions')
           .select('id')
           .eq('user_id', userId)
           .maybeSingle();
 
-        if (existingSubscription) {
-          await supabase
-            .from('subscriptions')
-            .update({
-              stripe_customer_id: session.customer as string,
-              status: 'active',
-              current_period_start: new Date().toISOString(),
-              current_period_end: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
-              updated_at: new Date().toISOString(),
-            })
-            .eq('user_id', userId);
-        } else {
-          const { error: insertError } = await supabase.from('subscriptions').insert({
-            user_id: userId,
-            stripe_customer_id: session.customer as string,
-            status: 'active',
-            current_period_start: new Date().toISOString(),
-            current_period_end: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
-          });
+        let subscriptionId;
 
-          if (insertError) {
-            console.error('[WEBHOOK] Error inserting subscription:', insertError);
-          } else {
-            console.log('[WEBHOOK] Subscription created successfully for user:', userId);
-          }
+        if (existingSubscription) {
+          const { data } = await supabase
+            .from('subscriptions')
+            .update(subscriptionData)
+            .eq('user_id', userId)
+            .select('id')
+            .single();
+          subscriptionId = data?.id;
+        } else {
+          const { data } = await supabase
+            .from('subscriptions')
+            .insert(subscriptionData)
+            .select('id')
+            .single();
+          subscriptionId = data?.id;
         }
 
-        const { error: paymentError } = await supabase.from('payments').insert({
+        // Record payment
+        await supabase.from('payments').insert({
           user_id: userId,
           stripe_payment_intent_id: session.payment_intent as string,
-          amount: session.amount_total || 100,
+          stripe_session_id: session.id,
+          subscription_id: subscriptionId,
+          amount: session.amount_total || 0,
           currency: session.currency || 'usd',
           status: 'succeeded',
         });
 
-        if (paymentError) {
-          console.error('[WEBHOOK] Error inserting payment:', paymentError);
-        } else {
-          console.log('[WEBHOOK] Payment recorded successfully');
-        }
-
-        break;
-      }
-
-      case 'payment_intent.succeeded': {
-        const paymentIntent = event.data.object as Stripe.PaymentIntent;
-        console.log('Payment succeeded:', paymentIntent.id);
-        break;
-      }
-
-      case 'payment_intent.payment_failed': {
-        const paymentIntent = event.data.object as Stripe.PaymentIntent;
-        console.error('Payment failed:', paymentIntent.id);
+        console.log('[WEBHOOK] Subscription and payment processed for user:', userId);
         break;
       }
 
