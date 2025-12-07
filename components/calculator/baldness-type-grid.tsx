@@ -6,7 +6,7 @@ import type { GenderPreference } from '@/lib/calculator-data';
 
 interface BaldnessTypeGridProps {
   types: BaldnessType[];
-  selectedType: BaldnessType | null;
+  selectedTypes: BaldnessType[];
   onSelectType: (type: BaldnessType) => void;
   genderPreference?: GenderPreference;
   disabled?: boolean;
@@ -14,7 +14,7 @@ interface BaldnessTypeGridProps {
 
 export function BaldnessTypeGrid({
   types,
-  selectedType,
+  selectedTypes,
   onSelectType,
   genderPreference = 'neutral',
   disabled = false,
@@ -25,7 +25,7 @@ export function BaldnessTypeGrid({
         <BaldnessTypeCard
           key={type.id}
           type={type}
-          isSelected={selectedType?.id === type.id}
+          isSelected={selectedTypes.some(t => t.id === type.id)}
           onSelect={onSelectType}
           genderPreference={genderPreference}
           disabled={disabled}

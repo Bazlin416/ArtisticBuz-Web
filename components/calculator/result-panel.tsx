@@ -3,16 +3,25 @@
 import { BaldnessType } from '@/types/calculator';
 import { calculatePrice } from '@/lib/calculator-data';
 import { Button } from '@/components/ui/button';
-import { Calculator, DollarSign, Scissors } from 'lucide-react';
+import { Calculator, DollarSign, Scissors, X } from 'lucide-react';
 
 interface ResultPanelProps {
-  selectedType: BaldnessType;
+  selectedTypes: BaldnessType[];
   onConsultationClick: () => void;
+  totals: {
+    totalGraftMin: number;
+    totalGraftMax: number;
+    totalGraftsRange: string;
+    avgGrafts: number;
+  };
 }
 
-export function ResultPanel({ selectedType, onConsultationClick }: ResultPanelProps) {
-  const avgGrafts = Math.round((selectedType.graftMin + selectedType.graftMax) / 2);
-  const priceInfo = calculatePrice(selectedType.graftMin, selectedType.graftMax);
+export function ResultPanel({ 
+  selectedTypes, 
+  onConsultationClick,
+  totals 
+}: ResultPanelProps) {
+  const priceInfo = calculatePrice(totals.totalGraftMin, totals.totalGraftMax);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-US').format(price);
@@ -26,7 +35,27 @@ export function ResultPanel({ selectedType, onConsultationClick }: ResultPanelPr
         </div>
         <div>
           <h3 className="text-2xl font-bold text-gray-900">Your Results</h3>
-          <p className="text-sm text-gray-600">Based on {selectedType.title}</p>
+          <p className="text-sm text-gray-600">
+            {selectedTypes.length} area{selectedTypes.length !== 1 ? 's' : ''} selected
+          </p>
+        </div>
+      </div>
+
+      {/* Selected Types List */}
+      <div className="mb-6">
+        <h4 className="font-semibold text-gray-900 mb-3">Selected Areas:</h4>
+        <div className="flex flex-wrap gap-3 mb-4">
+          {selectedTypes.map((type) => (
+            <div
+              key={type.id}
+              className="bg-white px-4 py-2 rounded-lg border border-emerald-200 text-emerald-700 flex items-center gap-2 shadow-sm"
+            >
+              <span>{type.title}</span>
+              <span className="text-xs bg-emerald-100 px-2 py-0.5 rounded">
+                {type.grafts}
+              </span>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -34,10 +63,11 @@ export function ResultPanel({ selectedType, onConsultationClick }: ResultPanelPr
         <div className="bg-white rounded-xl p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-2">
             <Scissors className="w-5 h-5 text-emerald-600" />
-            <p className="text-sm font-medium text-gray-600">Estimated Grafts</p>
+            <p className="text-sm font-medium text-gray-600">Total Estimated Grafts</p>
           </div>
-          <p className="text-3xl font-bold text-emerald-600">{selectedType.grafts}</p>
-          <p className="text-xs text-gray-500 mt-1">Average: {avgGrafts.toLocaleString()} grafts</p>
+          <p className="text-3xl font-bold text-emerald-600">{totals.totalGraftsRange}</p>
+          <p className="text-xs text-gray-500 mt-1">Average: {totals.avgGrafts.toLocaleString()} grafts</p>
+          <p className="text-xs text-gray-500 mt-1">({selectedTypes.length} area{selectedTypes.length !== 1 ? 's' : ''})</p>
         </div>
 
         <div className="bg-white rounded-xl p-6 shadow-sm">
@@ -50,12 +80,17 @@ export function ResultPanel({ selectedType, onConsultationClick }: ResultPanelPr
               <p className="text-3xl font-bold text-emerald-600">
                 KSH {formatPrice(priceInfo.min)}
               </p>
-              <p className="text-xs text-gray-500 mt-1">Fixed pricing</p>
+              {priceInfo.max && priceInfo.min !== priceInfo.max && (
+                <p className="text-xs text-gray-500 mt-1">
+                  Range: {formatPrice(priceInfo.min)} - {formatPrice(priceInfo.max)}
+                </p>
+              )}
+              <p className="text-xs text-gray-500 mt-1">Based on {totals.avgGrafts.toLocaleString()} grafts</p>
             </>
           ) : (
             <>
               <p className="text-3xl font-bold text-emerald-600">Custom</p>
-              <p className="text-xs text-gray-500 mt-1">Pricing available</p>
+              <p className="text-xs text-gray-500 mt-1">Pricing available on consultation</p>
             </>
           )}
         </div>
@@ -63,26 +98,35 @@ export function ResultPanel({ selectedType, onConsultationClick }: ResultPanelPr
         <div className="bg-white rounded-xl p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-2">
             <Calculator className="w-5 h-5 text-emerald-600" />
-            <p className="text-sm font-medium text-gray-600">Hair Density</p>
+            <p className="text-sm font-medium text-gray-600">Coverage Areas</p>
           </div>
-          <p className="text-3xl font-bold text-emerald-600">Natural</p>
-          <p className="text-xs text-gray-500 mt-1">Optimal coverage</p>
+          <p className="text-3xl font-bold text-emerald-600">{selectedTypes.length}</p>
+          <p className="text-xs text-gray-500 mt-1">
+            {selectedTypes.length > 1 ? 'Multiple areas' : 'Single area'}
+          </p>
+          <p className="text-xs text-gray-500 mt-1">Natural density coverage</p>
         </div>
       </div>
 
       <div className="bg-white rounded-xl p-6 mb-6">
         <h4 className="font-semibold text-gray-900 mb-2">About Your Selection</h4>
-        <p className="text-gray-600 text-sm leading-relaxed">
-          {selectedType.description} This calculation is an estimate based on typical cases.
-          Your actual requirements may vary based on hair characteristics, desired density,
-          and coverage area.
+        <p className="text-gray-600 text-sm leading-relaxed mb-3">
+          You've selected {selectedTypes.length} area{selectedTypes.length !== 1 ? 's' : ''} for hair restoration.
+          This combined calculation provides an estimate based on typical cases for multiple areas.
+          Your actual requirements may vary based on hair characteristics, desired density, and coverage area.
         </p>
+        <ul className="text-sm text-gray-600 space-y-1">
+          <li>• Individual graft estimates are combined for a total calculation</li>
+          <li>• Pricing is based on the total number of grafts needed</li>
+          <li>• Multiple areas may require staged procedures for optimal results</li>
+          <li>• A consultation will provide a precise personalized assessment</li>
+        </ul>
       </div>
 
       <Button
         onClick={onConsultationClick}
         size="lg"
-        className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-6 text-lg shadow-md"
+        className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-6 text-lg shadow-md hover:shadow-lg transition-shadow"
       >
         Get Free Consultation
       </Button>

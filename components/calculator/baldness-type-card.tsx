@@ -20,7 +20,10 @@ export function BaldnessTypeCard({
   genderPreference = 'neutral',
   disabled = false,
 }: BaldnessTypeCardProps) {
-  const displayImage = baldnessTypeImages[genderPreference][type.id as keyof typeof baldnessTypeImages.neutral] || type.image;
+  const displayImage =
+    baldnessTypeImages[genderPreference][
+      type.id as keyof typeof baldnessTypeImages.neutral
+    ] || type.image;
 
   return (
     <button
@@ -36,19 +39,28 @@ export function BaldnessTypeCard({
           : 'border-gray-200 bg-white hover:border-emerald-300'
       )}
     >
+      {/* Lock icon */}
       {disabled && (
         <div className="absolute top-3 right-3">
           <Lock className="w-6 h-6 text-gray-400" />
         </div>
       )}
 
+      {/* Selected checkmark */}
       {isSelected && !disabled && (
         <div className="absolute top-3 right-3">
           <CheckCircle2 className="w-6 h-6 text-emerald-500" />
         </div>
       )}
 
-      <div className="text-6xl mb-4 text-center">{displayImage}</div>
+      {/* IMAGE DISPLAY */}
+      <div className="mb-4 flex justify-center">
+        <img
+          src={displayImage}
+          alt={type.title}
+          className="h-20 w-auto object-contain"
+        />
+      </div>
 
       <h3 className="font-semibold text-lg text-gray-900 mb-1">
         {type.title}

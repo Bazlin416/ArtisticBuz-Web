@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button";
 import type { GenderPreference } from "@/lib/calculator-data";
 
 export default function Home() {
-  const [selectedType, setSelectedType] = useState<BaldnessType | null>(null);
+  const [selectedTypes, setSelectedTypes] = useState<BaldnessType[]>([]);
   const [isConsultationModalOpen, setIsConsultationModalOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
@@ -116,13 +116,46 @@ export default function Home() {
       return;
     }
 
-    setSelectedType(type);
+    // Toggle selection
+    setSelectedTypes(prev => {
+      const isAlreadySelected = prev.some(t => t.id === type.id);
+      if (isAlreadySelected) {
+        return prev.filter(t => t.id !== type.id);
+      } else {
+        return [...prev, type];
+      }
+    });
+
     setTimeout(() => {
       document
         .getElementById("results")
         ?.scrollIntoView({ behavior: "smooth", block: "center" });
     }, 100);
   };
+
+  const calculateTotals = () => {
+    if (selectedTypes.length === 0) {
+      return {
+        totalGraftMin: 0,
+        totalGraftMax: 0,
+        totalGraftsRange: "0",
+        avgGrafts: 0
+      };
+    }
+
+    const totalGraftMin = selectedTypes.reduce((sum, type) => sum + type.graftMin, 0);
+    const totalGraftMax = selectedTypes.reduce((sum, type) => sum + type.graftMax, 0);
+    const avgGrafts = Math.round((totalGraftMin + totalGraftMax) / 2);
+    
+    return {
+      totalGraftMin,
+      totalGraftMax,
+      totalGraftsRange: `${totalGraftMin.toLocaleString()} - ${totalGraftMax.toLocaleString()}`,
+      avgGrafts
+    };
+  };
+
+  const totals = calculateTotals();
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -277,7 +310,7 @@ export default function Home() {
                   Calculate Your Hair Restoration Needs
                 </h2>
                 <p className="text-gray-600 text-lg max-w-2xl mx-auto mb-6">
-                  Select your hair loss pattern below to get an instant estimate
+                  Select your hair loss pattern(s) below to get an instant estimate
                   of the number of grafts you may need for optimal results.
                 </p>
 
@@ -320,57 +353,74 @@ export default function Home() {
                 )}
 
                 {user && isSubscribed && (
-                  <div className="flex justify-center gap-4 mb-8">
-                    <button
-                      onClick={() => setGenderPreference("neutral")}
-                      className={`px-6 py-3 rounded-lg font-medium transition-all ${
-                        genderPreference === "neutral"
-                          ? "bg-emerald-600 text-white shadow-md"
-                          : "bg-white text-gray-700 hover:bg-gray-100"
-                      }`}
-                    >
-                      Neutral
-                    </button>
-                    <button
-                      onClick={() => setGenderPreference("male")}
-                      className={`px-6 py-3 rounded-lg font-medium transition-all ${
-                        genderPreference === "male"
-                          ? "bg-emerald-600 text-white shadow-md"
-                          : "bg-white text-gray-700 hover:bg-gray-100"
-                      }`}
-                    >
-                      Male
-                    </button>
-                    <button
-                      onClick={() => setGenderPreference("female")}
-                      className={`px-6 py-3 rounded-lg font-medium transition-all ${
-                        genderPreference === "female"
-                          ? "bg-emerald-600 text-white shadow-md"
-                          : "bg-white text-gray-700 hover:bg-gray-100"
-                      }`}
-                    >
-                      Female
-                    </button>
+                  <div className="flex flex-col items-center gap-6 mb-8">
+                    <div className="flex justify-center gap-4">
+                      <button
+                        onClick={() => setGenderPreference("neutral")}
+                        className={`px-6 py-3 rounded-lg font-medium transition-all ${
+                          genderPreference === "neutral"
+                            ? "bg-emerald-600 text-white shadow-md"
+                            : "bg-white text-gray-700 hover:bg-gray-100"
+                        }`}
+                      >
+                        Neutral
+                      </button>
+                      <button
+                        onClick={() => setGenderPreference("male")}
+                        className={`px-6 py-3 rounded-lg font-medium transition-all ${
+                          genderPreference === "male"
+                            ? "bg-emerald-600 text-white shadow-md"
+                            : "bg-white text-gray-700 hover:bg-gray-100"
+                        }`}
+                      >
+                        Male
+                      </button>
+                      <button
+                        onClick={() => setGenderPreference("female")}
+                        className={`px-6 py-3 rounded-lg font-medium transition-all ${
+                          genderPreference === "female"
+                            ? "bg-emerald-600 text-white shadow-md"
+                            : "bg-white text-gray-700 hover:bg-gray-100"
+                        }`}
+                      >
+                        Female
+                      </button>
+                    </div>
+                    
+                    {selectedTypes.length > 0 && (
+                      <div className="flex items-center gap-4">
+                        <span className="text-gray-600">
+                          {selectedTypes.length} area{selectedTypes.length !== 1 ? 's' : ''} selected
+                        </span>
+                        <button
+                          onClick={() => setSelectedTypes([])}
+                          className="text-sm text-gray-600 hover:text-red-600 hover:underline"
+                        >
+                          Clear All
+                        </button>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
 
               <BaldnessTypeGrid
                 types={baldnessTypes}
-                selectedType={selectedType}
+                selectedTypes={selectedTypes}
                 onSelectType={handleSelectType}
                 genderPreference={genderPreference}
                 disabled={!user || !isSubscribed}
               />
 
-              {selectedType && user && isSubscribed && (
+              {selectedTypes.length > 0 && user && isSubscribed && (
                 <div
                   id="results"
                   className="mt-12 animate-in fade-in slide-in-from-bottom-4 duration-500"
                 >
                   <ResultPanel
-                    selectedType={selectedType}
+                    selectedTypes={selectedTypes}
                     onConsultationClick={() => setIsConsultationModalOpen(true)}
+                    totals={totals}
                   />
                 </div>
               )}
@@ -461,12 +511,12 @@ export default function Home() {
         onClose={() => setIsSubscriptionModalOpen(false)}
       />
 
-      {selectedType && (
+      {selectedTypes.length > 0 && (
         <ConsultationFormModal
           isOpen={isConsultationModalOpen}
           onClose={() => setIsConsultationModalOpen(false)}
-          selectedType={selectedType.title}
-          estimatedGrafts={selectedType.grafts}
+          selectedType={selectedTypes.map(t => t.title).join(", ")}
+          estimatedGrafts={totals.totalGraftsRange}
         />
       )}
     </div>
