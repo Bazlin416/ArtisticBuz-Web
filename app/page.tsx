@@ -117,10 +117,10 @@ export default function Home() {
     }
 
     // Toggle selection
-    setSelectedTypes(prev => {
-      const isAlreadySelected = prev.some(t => t.id === type.id);
+    setSelectedTypes((prev) => {
+      const isAlreadySelected = prev.some((t) => t.id === type.id);
       if (isAlreadySelected) {
-        return prev.filter(t => t.id !== type.id);
+        return prev.filter((t) => t.id !== type.id);
       } else {
         return [...prev, type];
       }
@@ -139,19 +139,25 @@ export default function Home() {
         totalGraftMin: 0,
         totalGraftMax: 0,
         totalGraftsRange: "0",
-        avgGrafts: 0
+        avgGrafts: 0,
       };
     }
 
-    const totalGraftMin = selectedTypes.reduce((sum, type) => sum + type.graftMin, 0);
-    const totalGraftMax = selectedTypes.reduce((sum, type) => sum + type.graftMax, 0);
+    const totalGraftMin = selectedTypes.reduce(
+      (sum, type) => sum + type.graftMin,
+      0
+    );
+    const totalGraftMax = selectedTypes.reduce(
+      (sum, type) => sum + type.graftMax,
+      0
+    );
     const avgGrafts = Math.round((totalGraftMin + totalGraftMax) / 2);
-    
+
     return {
       totalGraftMin,
       totalGraftMax,
       totalGraftsRange: `${totalGraftMin.toLocaleString()} - ${totalGraftMax.toLocaleString()}`,
-      avgGrafts
+      avgGrafts,
     };
   };
 
@@ -175,7 +181,11 @@ export default function Home() {
                 <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-emerald-50 mb-6 sm:mb-8 leading-relaxed max-w-2xl">
                   Estimate how many hair grafts you need for a natural hair
                   transplant. Our easy-to-use hair transplant graft calculator
-                  helps you plan your hair restoration journey with confidence.
+                  helps you plan your hair restoration journey with confidence.{" "}
+                  <span className="font-semibold bg-emerald-800/30 px-2 py-1 rounded">
+                    Subscribe to access detailed graft counts and pricing
+                    estimates.
+                  </span>
                 </p>
 
                 <button
@@ -193,9 +203,9 @@ export default function Home() {
                   <div className="relative rounded-2xl overflow-hidden shadow-2xl border-4 border-white/20 h-48 sm:h-56 md:h-64 lg:h-80 xl:h-96 w-full">
                     {/* Images */}
                     {[
+                      "/mzungu.jpg",
                       "/Patient-Images-ArtisticClinic-Nairobi-11-25-2025_12_36_AM.png",
                       "/female.png",
-                      "/mzungu.jpg",
                     ].map((src, index) => (
                       <div
                         key={index}
@@ -310,8 +320,9 @@ export default function Home() {
                   Calculate Your Hair Restoration Needs
                 </h2>
                 <p className="text-gray-600 text-lg max-w-2xl mx-auto mb-6">
-                  Select your hair loss pattern(s) below to get an instant estimate
-                  of the number of grafts you may need for optimal results.
+                  Select your hair loss pattern(s) below to get an instant
+                  estimate of the number of grafts you may need for optimal
+                  results.
                 </p>
 
                 {!loading && !user && (
@@ -386,11 +397,12 @@ export default function Home() {
                         Female
                       </button>
                     </div>
-                    
+
                     {selectedTypes.length > 0 && (
                       <div className="flex items-center gap-4">
                         <span className="text-gray-600">
-                          {selectedTypes.length} area{selectedTypes.length !== 1 ? 's' : ''} selected
+                          {selectedTypes.length} area
+                          {selectedTypes.length !== 1 ? "s" : ""} selected
                         </span>
                         <button
                           onClick={() => setSelectedTypes([])}
@@ -515,7 +527,7 @@ export default function Home() {
         <ConsultationFormModal
           isOpen={isConsultationModalOpen}
           onClose={() => setIsConsultationModalOpen(false)}
-          selectedType={selectedTypes.map(t => t.title).join(", ")}
+          selectedType={selectedTypes.map((t) => t.title).join(", ")}
           estimatedGrafts={totals.totalGraftsRange}
         />
       )}
