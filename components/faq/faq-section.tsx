@@ -45,7 +45,7 @@ export function FAQSection() {
             ))}
           </Accordion>
 
-          <div className="mt-12 p-6 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl border border-emerald-100 text-center">
+          {/* <div className="mt-12 p-6 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl border border-emerald-100 text-center">
             <h3 className="font-semibold text-gray-900 mb-2">Still have questions?</h3>
             <p className="text-gray-600 mb-4">
               Our specialists are here to help. Get in touch for personalized answers.
@@ -56,7 +56,7 @@ export function FAQSection() {
             >
               Contact Our Team
             </a>
-          </div>
+          </div> */}
         </div>
       </div>
     </section>

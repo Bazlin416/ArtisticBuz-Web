@@ -133,6 +133,35 @@ export default function Home() {
     }, 100);
   };
 
+  const handleConsultationClick = () => {
+    if (!user) {
+      setIsAuthModalOpen(true);
+      return;
+    }
+
+    if (!isSubscribed) {
+      // Scroll to calculator section if not subscribed
+      if (typeof window !== "undefined") {
+        // Method 1: Using window.location.hash (updates URL)
+        window.location.hash = "#calculator";
+
+        // Method 2: Using scrollIntoView (smooth scroll)
+        setTimeout(() => {
+          const calculatorSection = document.getElementById("calculator");
+          if (calculatorSection) {
+            calculatorSection.scrollIntoView({
+              behavior: "smooth",
+              block: "center",
+            });
+          }
+        }, 100);
+      }
+      return;
+    }
+
+    setIsConsultationModalOpen(true);
+  };
+
   const calculateTotals = () => {
     if (selectedTypes.length === 0) {
       return {
@@ -188,12 +217,34 @@ export default function Home() {
                   </span>
                 </p>
 
-                <button
-                  onClick={() => setIsConsultationModalOpen(true)}
-                  className="bg-white text-emerald-700 hover:bg-emerald-50 px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-semibold text-base sm:text-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl mb-8 lg:mb-0 w-full sm:w-auto"
-                >
-                  Get a Consultation
-                </button>
+                <div className="relative inline-block">
+                  <button
+                    onClick={() => {
+                      // Only works when subscribed
+                      const calculatorSection =
+                        document.getElementById("calculator");
+                      if (calculatorSection) {
+                        calculatorSection.scrollIntoView({
+                          behavior: "smooth",
+                          block: "start",
+                        });
+                      }
+                    }}
+                    disabled={!loading && !isSubscribed}
+                    className={`${
+                      user && isSubscribed
+                        ? "bg-white text-emerald-700 hover:bg-emerald-50 hover:scale-105 hover:shadow-xl cursor-pointer"
+                        : "bg-white/80 text-emerald-700/70 cursor-not-allowed opacity-75"
+                    } px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-semibold text-base sm:text-lg transition-all duration-300 transform shadow-lg relative pr-12`}
+                  >
+                    Get a Consultation
+                    {!loading && !isSubscribed && (
+                      <span className="absolute -top-2 -right-2 bg-amber-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg">
+                        SUBSCRIBE
+                      </span>
+                    )}
+                  </button>
+                </div>
               </div>
 
               {/* Right Content - Carousel */}
@@ -203,9 +254,9 @@ export default function Home() {
                   <div className="relative rounded-2xl overflow-hidden shadow-2xl border-4 border-white/20 h-48 sm:h-56 md:h-64 lg:h-80 xl:h-96 w-full">
                     {/* Images */}
                     {[
-                      "/mzungu.jpg",
                       "/Patient-Images-ArtisticClinic-Nairobi-11-25-2025_12_36_AM.png",
                       "/female.png",
+                      "/mzungu.jpg",
                     ].map((src, index) => (
                       <div
                         key={index}
@@ -500,12 +551,34 @@ export default function Home() {
                 Get a free consultation with our specialists and receive a
                 personalized treatment plan
               </p>
-              <button
-                onClick={() => setIsConsultationModalOpen(true)}
-                className="bg-white text-emerald-600 hover:bg-emerald-50 font-semibold px-8 py-4 rounded-lg text-lg transition-colors shadow-lg"
-              >
-                Schedule Free Consultation
-              </button>
+              <div className="relative inline-block">
+                <button
+                  onClick={() => {
+                    // Only works when subscribed
+                    const calculatorSection =
+                      document.getElementById("calculator");
+                    if (calculatorSection) {
+                      calculatorSection.scrollIntoView({
+                        behavior: "smooth",
+                        block: "start",
+                      });
+                    }
+                  }}
+                  disabled={!loading && !isSubscribed}
+                  className={`${
+                    user && isSubscribed
+                      ? "bg-white text-emerald-600 hover:bg-emerald-50 hover:shadow-xl cursor-pointer"
+                      : "bg-white/80 text-emerald-600/70 cursor-not-allowed opacity-75"
+                  } font-semibold px-8 py-4 rounded-lg text-lg transition-all duration-300 shadow-lg relative pr-16`}
+                >
+                  Schedule Free Consultation
+                  {!loading && !isSubscribed && (
+                    <span className="absolute -top-2 -right-2 bg-amber-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg">
+                      SUBSCRIBE
+                    </span>
+                  )}
+                </button>
+              </div>
             </div>
           </div>
         </section>
