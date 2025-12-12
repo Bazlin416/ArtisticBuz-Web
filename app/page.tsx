@@ -32,9 +32,9 @@ export default function Home() {
   // Auto-slide carousel
   useEffect(() => {
     const slides = [
+      "/mzungu.jpg",
       "/Patient-Images-ArtisticClinic-Nairobi-11-25-2025_12_36_AM.png",
       "/female.png",
-      "/mzungu.jpg",
     ];
 
     const interval = setInterval(() => {
