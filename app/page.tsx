@@ -15,6 +15,7 @@ import { Calculator, Shield, Award, Users, Lock } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
 import { Button } from "@/components/ui/button";
 import type { GenderPreference } from "@/lib/calculator-data";
+import { CurrencyService } from "@/lib/currency-service";
 
 export default function Home() {
   const [selectedTypes, setSelectedTypes] = useState<BaldnessType[]>([]);
@@ -24,7 +25,14 @@ export default function Home() {
   const [genderPreference, setGenderPreference] =
     useState<GenderPreference>("neutral");
   const { user, isSubscribed, loading } = useAuth();
-  const [country, setCountry] = useState<string>("default");
+  const [country, setCountry] = useState<string>("");
+  const [currencyInfo, setCurrencyInfo] = useState<{
+    currency: string;
+    display: string;
+    rate: number;
+  } | null>(null);
+  const [loadingCurrency, setLoadingCurrency] = useState(true);
+
   const [detectedCurrency, setDetectedCurrency] = useState<string>("USD");
   const [detectedAmount, setDetectedAmount] = useState<string>("$1.00");
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -32,7 +40,7 @@ export default function Home() {
   // Auto-slide carousel
   useEffect(() => {
     const slides = [
-      "/mzungu.jpg",
+      "/mzungu.png",
       "/Patient-Images-ArtisticClinic-Nairobi-11-25-2025_12_36_AM.png",
       "/female.png",
     ];
@@ -51,58 +59,48 @@ export default function Home() {
 
   const detectCountry = async () => {
     try {
+      setLoadingCurrency(true);
       const response = await fetch("https://ipapi.co/json/");
       if (response.ok) {
         const data = await response.json();
-        const detectedCountry = data.country_code || "default";
+        const detectedCountry = data.country_code || "US";
         setCountry(detectedCountry);
 
-        const currencyInfo = getCurrencyInfo(detectedCountry);
-        setDetectedCurrency(currencyInfo.currency);
-        setDetectedAmount(currencyInfo.display);
+        // Get dynamic currency info
+        const info = await CurrencyService.getCurrencyInfo(detectedCountry);
+        setCurrencyInfo({
+          currency: info.currency,
+          display: info.display,
+          rate: info.rate,
+        });
+
+        // Update your existing state variables
+        setDetectedCurrency(info.currency);
+        setDetectedAmount(info.display);
 
         console.log(
           "Detected country:",
           detectedCountry,
           "Currency:",
-          currencyInfo.currency
+          info.currency,
+          "Rate:",
+          info.rate
         );
       }
     } catch (err) {
       console.error("Error detecting country:", err);
+      // Fallback to USD
+      const fallbackInfo = await CurrencyService.getCurrencyInfo("US");
+      setCurrencyInfo({
+        currency: fallbackInfo.currency,
+        display: fallbackInfo.display,
+        rate: fallbackInfo.rate,
+      });
+      setDetectedCurrency(fallbackInfo.currency);
+      setDetectedAmount(fallbackInfo.display);
+    } finally {
+      setLoadingCurrency(false);
     }
-  };
-
-  const getCurrencyInfo = (
-    countryCode: string
-  ): { currency: string; display: string } => {
-    const currencyMap: Record<string, { currency: string; display: string }> = {
-      US: { currency: "USD", display: "$4.99" },
-      KE: { currency: "KES", display: "KSH 649" },
-      GB: { currency: "GBP", display: "£3.99" },
-      NG: { currency: "NGN", display: "₦7,984" },
-      ZA: { currency: "ZAR", display: "R95" },
-      default: { currency: "USD", display: "$4.99" },
-    };
-
-    const euCountries = [
-      "DE",
-      "FR",
-      "IT",
-      "ES",
-      "NL",
-      "BE",
-      "AT",
-      "IE",
-      "PT",
-      "FI",
-      "GR",
-    ];
-    if (euCountries.includes(countryCode)) {
-      return { currency: "EUR", display: "€4.75" };
-    }
-
-    return currencyMap[countryCode] || currencyMap["default"];
   };
 
   const handleSelectType = (type: BaldnessType) => {
@@ -254,9 +252,9 @@ export default function Home() {
                   <div className="relative rounded-2xl overflow-hidden shadow-2xl border-4 border-white/20 h-48 sm:h-56 md:h-64 lg:h-80 xl:h-96 w-full">
                     {/* Images */}
                     {[
+                      "/mzungu.jpg",
                       "/Patient-Images-ArtisticClinic-Nairobi-11-25-2025_12_36_AM.png",
                       "/female.png",
-                      "/mzungu.jpg",
                     ].map((src, index) => (
                       <div
                         key={index}
@@ -322,48 +320,65 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="py-16 bg-white">
-          <div className="container mx-auto px-4">
-            <div className="grid md:grid-cols-4 gap-8 max-w-5xl mx-auto">
-              <div className="text-center">
-                <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Users className="w-8 h-8 text-emerald-600" />
+        <section className="py-5 sm:py-16 bg-white">
+          <div className="container mx-auto px-2 sm:px-4">
+            <div className="flex flex-row justify-between items-center gap-3 sm:gap-6 md:gap-8 max-w-5xl mx-auto">
+              {/* Stat 1 */}
+              <div className="text-center flex-1">
+                <div className="w-10 h-10 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-2 sm:mb-3 md:mb-4">
+                  <Users className="w-4 h-4 sm:w-6 sm:h-6 md:w-8 md:h-8 text-emerald-600" />
                 </div>
-                <h3 className="font-bold text-2xl text-gray-900 mb-1">
+                <h3 className="font-bold text-base sm:text-xl md:text-2xl text-gray-900 mb-0.5 sm:mb-1">
                   15,000+
                 </h3>
-                <p className="text-gray-600 text-sm">Happy Patients</p>
+                <p className="text-gray-600 text-xs sm:text-sm leading-tight">
+                  Happy Patients
+                </p>
               </div>
-              <div className="text-center">
-                <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Award className="w-8 h-8 text-emerald-600" />
+
+              {/* Stat 2 */}
+              <div className="text-center flex-1">
+                <div className="w-10 h-10 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-2 sm:mb-3 md:mb-4">
+                  <Award className="w-4 h-4 sm:w-6 sm:h-6 md:w-8 md:h-8 text-emerald-600" />
                 </div>
-                <h3 className="font-bold text-2xl text-gray-900 mb-1">
+                <h3 className="font-bold text-base sm:text-xl md:text-2xl text-gray-900 mb-0.5 sm:mb-1">
                   20+ Years
                 </h3>
-                <p className="text-gray-600 text-sm">Experience</p>
+                <p className="text-gray-600 text-xs sm:text-sm leading-tight">
+                  Experience
+                </p>
               </div>
-              <div className="text-center">
-                <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Shield className="w-8 h-8 text-emerald-600" />
+
+              {/* Stat 3 */}
+              <div className="text-center flex-1">
+                <div className="w-10 h-10 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-2 sm:mb-3 md:mb-4">
+                  <Shield className="w-4 h-4 sm:w-6 sm:h-6 md:w-8 md:h-8 text-emerald-600" />
                 </div>
-                <h3 className="font-bold text-2xl text-gray-900 mb-1">98%</h3>
-                <p className="text-gray-600 text-sm">Success Rate</p>
+                <h3 className="font-bold text-base sm:text-xl md:text-2xl text-gray-900 mb-0.5 sm:mb-1">
+                  98%
+                </h3>
+                <p className="text-gray-600 text-xs sm:text-sm leading-tight">
+                  Success Rate
+                </p>
               </div>
-              <div className="text-center">
-                <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Calculator className="w-8 h-8 text-emerald-600" />
+
+              {/* Stat 4 */}
+              <div className="text-center flex-1">
+                <div className="w-10 h-10 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-2 sm:mb-3 md:mb-4">
+                  <Calculator className="w-4 h-4 sm:w-6 sm:h-6 md:w-8 md:h-8 text-emerald-600" />
                 </div>
-                <h3 className="font-bold text-2xl text-gray-900 mb-1">
+                <h3 className="font-bold text-base sm:text-xl md:text-2xl text-gray-900 mb-0.5 sm:mb-1">
                   Certified
                 </h3>
-                <p className="text-gray-600 text-sm">Specialists</p>
+                <p className="text-gray-600 text-xs sm:text-sm leading-tight">
+                  Specialists
+                </p>
               </div>
             </div>
           </div>
         </section>
 
-        <section className="py-20 bg-gray-50" id="calculator">
+        <section className="py-5 bg-gray-50" id="calculator">
           <div className="container mx-auto px-4">
             <div className="max-w-7xl mx-auto">
               <div className="text-center mb-12">
@@ -399,7 +414,7 @@ export default function Home() {
                   <div className="bg-amber-50 border border-amber-200 rounded-lg p-6 max-w-2xl mx-auto mb-8">
                     <Lock className="w-12 h-12 text-amber-600 mx-auto mb-3" />
                     <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                      Subscribe to Access Results
+                      Subscribe to Access Calculator and Result
                     </h3>
                     <p className="text-gray-600 mb-4">
                       Get lifetime access to the calculator for just{" "}
@@ -548,7 +563,7 @@ export default function Home() {
                 Ready to Start Your Hair Restoration Journey?
               </h2>
               <p className="text-emerald-50 text-lg mb-8">
-                Get a free consultation with our specialists and receive a
+                Consult our specialists and receive a
                 personalized treatment plan
               </p>
               <div className="relative inline-block">
@@ -571,7 +586,7 @@ export default function Home() {
                       : "bg-white/80 text-emerald-600/70 cursor-not-allowed opacity-75"
                   } font-semibold px-8 py-4 rounded-lg text-lg transition-all duration-300 shadow-lg relative pr-16`}
                 >
-                  Schedule Free Consultation
+                  Schedule a Consultation
                   {!loading && !isSubscribed && (
                     <span className="absolute -top-2 -right-2 bg-amber-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg">
                       SUBSCRIBE

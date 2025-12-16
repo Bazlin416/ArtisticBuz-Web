@@ -11,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { CheckCircle, Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
+import { CurrencyService } from "@/lib/currency-service";
 
 interface SubscriptionModalProps {
   isOpen: boolean;
@@ -25,6 +26,13 @@ export function SubscriptionModal({ isOpen, onClose }: SubscriptionModalProps) {
   const [detectedAmount, setDetectedAmount] = useState<string>("$1.00");
   const { session, loading: authLoading, checkSubscription } = useAuth();
 
+  const [currencyInfo, setCurrencyInfo] = useState<{
+    currency: string;
+    display: string;
+    rate: number;
+  } | null>(null);
+  const [loadingCurrency, setLoadingCurrency] = useState(true);
+
   useEffect(() => {
     if (isOpen) {
       detectCountry();
@@ -33,58 +41,48 @@ export function SubscriptionModal({ isOpen, onClose }: SubscriptionModalProps) {
 
   const detectCountry = async () => {
     try {
+      setLoadingCurrency(true);
       const response = await fetch("https://ipapi.co/json/");
       if (response.ok) {
         const data = await response.json();
-        const detectedCountry = data.country_code || "default";
+        const detectedCountry = data.country_code || "US";
         setCountry(detectedCountry);
 
-        const currencyInfo = getCurrencyInfo(detectedCountry);
-        setDetectedCurrency(currencyInfo.currency);
-        setDetectedAmount(currencyInfo.display);
+        // Get dynamic currency info
+        const info = await CurrencyService.getCurrencyInfo(detectedCountry);
+        setCurrencyInfo({
+          currency: info.currency,
+          display: info.display,
+          rate: info.rate,
+        });
+
+        // Update your existing state variables
+        setDetectedCurrency(info.currency);
+        setDetectedAmount(info.display);
 
         console.log(
           "Detected country:",
           detectedCountry,
           "Currency:",
-          currencyInfo.currency
+          info.currency,
+          "Rate:",
+          info.rate
         );
       }
     } catch (err) {
       console.error("Error detecting country:", err);
+      // Fallback to USD
+      const fallbackInfo = await CurrencyService.getCurrencyInfo("US");
+      setCurrencyInfo({
+        currency: fallbackInfo.currency,
+        display: fallbackInfo.display,
+        rate: fallbackInfo.rate,
+      });
+      setDetectedCurrency(fallbackInfo.currency);
+      setDetectedAmount(fallbackInfo.display);
+    } finally {
+      setLoadingCurrency(false);
     }
-  };
-
-  const getCurrencyInfo = (
-    countryCode: string
-  ): { currency: string; display: string } => {
-    const currencyMap: Record<string, { currency: string; display: string }> = {
-      US: { currency: "USD", display: "$4.99" },
-      KE: { currency: "KES", display: "KSH 649" },
-      GB: { currency: "GBP", display: "£3.99" },
-      NG: { currency: "NGN", display: "₦7,984" },
-      ZA: { currency: "ZAR", display: "R95" },
-      default: { currency: "USD", display: "$4.99" },
-    };
-
-    const euCountries = [
-      "DE",
-      "FR",
-      "IT",
-      "ES",
-      "NL",
-      "BE",
-      "AT",
-      "IE",
-      "PT",
-      "FI",
-      "GR",
-    ];
-    if (euCountries.includes(countryCode)) {
-      return { currency: "EUR", display: "€4.75" };
-    }
-
-    return currencyMap[countryCode] || currencyMap["default"];
   };
 
   const handleSubscribe = async () => {
