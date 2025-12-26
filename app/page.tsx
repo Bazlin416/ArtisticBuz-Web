@@ -16,6 +16,11 @@ import { useAuth } from "@/contexts/auth-context";
 import { Button } from "@/components/ui/button";
 import type { GenderPreference } from "@/lib/calculator-data";
 import { CurrencyService } from "@/lib/currency-service";
+import HairSpline from "@/components/HairSpline";
+import HairGraftCalculator from "@/components/HairCalculator";
+import { AreaKey } from "@/lib/spline-area-map";
+import Image from "next/image";
+
 
 export default function Home() {
   const [selectedTypes, setSelectedTypes] = useState<BaldnessType[]>([]);
@@ -37,20 +42,26 @@ export default function Home() {
   const [detectedAmount, setDetectedAmount] = useState<string>("$1.00");
   const [currentSlide, setCurrentSlide] = useState(0);
 
+  const [selectedArea, setSelectedArea] = useState<AreaKey | null>(null);
+
+  const heroImages = [
+    { src: "/American-man.png", alt: "Male hair transplant result" },
+    { src: "/American-lady.png", alt: "Female hair transplant result" },
+    { src: "/African-man.png", alt: "Male afro hair transplant result" },
+    { src: "/African-lady.png", alt: "Female afro hair transplant result" },
+  ];
+
+
+
   // Auto-slide carousel
   useEffect(() => {
-    const slides = [
-      "/mzungu.png",
-      "/Patient-Images-ArtisticClinic-Nairobi-11-25-2025_12_36_AM.png",
-      "/female.png",
-    ];
-
     const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % slides.length);
-    }, 4000); // Change slide every 4 seconds
+      setCurrentSlide((prev) => (prev + 1) % heroImages.length);
+    }, 4000);
 
     return () => clearInterval(interval);
   }, []);
+
 
   // Move the useEffect hook here, after all useState declarations
   useEffect(() => {
@@ -201,26 +212,58 @@ export default function Home() {
           <div className="container mx-auto px-4 relative z-10">
             <div className="flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-12 max-w-7xl mx-auto">
               {/* Left Content */}
-              <div className="flex-1 text-center lg:text-left order-2 lg:order-1">
-                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 leading-tight">
-                  Hair Graft Calculator
+              <div className="flex-1 text-center lg:text-left order-2 lg:order-1 space-y-6">
+
+                {/* Eyebrow / Badge */}
+                <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur px-4 py-2 rounded-full text-sm font-medium text-emerald-50">
+                  <Shield className="w-4 h-4 text-emerald-200" />
+                  Clinically Guided Hair Restoration Tool
+                </div>
+
+                {/* Headline */}
+                <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold leading-tight tracking-tight">
+                  Know Exactly How Many{" "}
+                  <span className="text-emerald-200">Hair Grafts</span>
+                  <br className="hidden sm:block" />
+                  You Need
                 </h1>
-                <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-emerald-50 mb-6 sm:mb-8 leading-relaxed max-w-2xl">
-                  Estimate how many hair grafts you need for a natural hair
-                  transplant. Our easy-to-use hair transplant graft calculator
-                  helps you plan your hair restoration journey with confidence.{" "}
-                  <span className="font-semibold bg-emerald-800/30 px-2 py-1 rounded">
-                    Subscribe to access detailed graft counts and pricing
-                    estimates.
-                  </span>
+
+                {/* Description */}
+                <p className="text-base sm:text-lg md:text-xl text-emerald-50/90 max-w-2xl leading-relaxed">
+                  Use our professional hair graft calculator to estimate the number of grafts
+                  required for a natural-looking transplant — tailored to your hair loss
+                  pattern, density, and goals.
                 </p>
 
-                <div className="relative inline-block">
+                {/* Trust Points */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl">
+                  <div className="flex items-center gap-3">
+                    <Users className="w-5 h-5 text-emerald-200" />
+                    <span className="text-sm text-emerald-50/90">
+                      15,000+ Patients Assisted
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Award className="w-5 h-5 text-emerald-200" />
+                    <span className="text-sm text-emerald-50/90">
+                      20+ Years Clinical Insight
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Calculator className="w-5 h-5 text-emerald-200" />
+                    <span className="text-sm text-emerald-50/90">
+                      Instant Graft Estimation
+                    </span>
+                  </div>
+                </div>
+
+                {/* CTA Group */}
+                <div className="flex flex-col sm:flex-row gap-4 pt-4 items-center sm:items-start">
+
+                  {/* Primary CTA */}
                   <button
                     onClick={() => {
-                      // Only works when subscribed
-                      const calculatorSection =
-                        document.getElementById("calculator");
+                      const calculatorSection = document.getElementById("calculator");
                       if (calculatorSection) {
                         calculatorSection.scrollIntoView({
                           behavior: "smooth",
@@ -229,330 +272,522 @@ export default function Home() {
                       }
                     }}
                     disabled={!loading && !isSubscribed}
-                    className={`${
-                      user && isSubscribed
-                        ? "bg-white text-emerald-700 hover:bg-emerald-50 hover:scale-105 hover:shadow-xl cursor-pointer"
-                        : "bg-white/80 text-emerald-700/70 cursor-not-allowed opacity-75"
-                    } px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-semibold text-base sm:text-lg transition-all duration-300 transform shadow-lg relative pr-12`}
+                    className={`${user && isSubscribed
+                      ? "bg-white text-emerald-700 hover:bg-emerald-50 hover:shadow-xl"
+                      : "bg-white/80 text-emerald-700/70 cursor-not-allowed opacity-75"
+                      } px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 shadow-lg relative`}
                   >
-                    Get a Consultation
+                    Start Your Assessment
                     {!loading && !isSubscribed && (
                       <span className="absolute -top-2 -right-2 bg-amber-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg">
                         SUBSCRIBE
                       </span>
                     )}
                   </button>
+
+                  {/* Secondary CTA */}
+                  <button
+                    onClick={handleConsultationClick}
+                    className="text-white/90 underline underline-offset-4 hover:text-white text-sm font-medium"
+                  >
+                    Speak to a Specialist
+                  </button>
                 </div>
+
+                {/* Subscription Hint */}
+                <p className="text-xs text-emerald-100/70 max-w-md">
+                  Full graft breakdown & pricing available with a one-time subscription.
+                </p>
               </div>
 
-              {/* Right Content - Carousel */}
-              <div className="flex-1 flex justify-center lg:justify-end w-full order-1 lg:order-2 mb-8 lg:mb-0">
-                <div className="relative w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl xl:max-w-2xl">
-                  {/* Carousel Container */}
-                  <div className="relative rounded-2xl overflow-hidden shadow-2xl border-4 border-white/20 h-48 sm:h-56 md:h-64 lg:h-80 xl:h-96 w-full">
-                    {/* Images */}
-                    {[
-                      "/mzungu.jpg",
-                      "/Patient-Images-ArtisticClinic-Nairobi-11-25-2025_12_36_AM.png",
-                      "/female.png",
-                    ].map((src, index) => (
-                      <div
-                        key={index}
-                        className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out ${
-                          index === currentSlide ? "opacity-100" : "opacity-0"
-                        }`}
-                      >
-                        <img
-                          src={src}
-                          alt={`Hair transplant result ${index + 1}`}
-                          className="w-full h-full object-cover"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-emerald-900/30 to-transparent"></div>
-                      </div>
-                    ))}
 
-                    {/* Navigation Dots */}
-                    <div className="absolute bottom-3 sm:bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
-                      {[0, 1, 2].map((index) => (
-                        <button
-                          key={index}
-                          onClick={() => setCurrentSlide(index)}
-                          className={`w-2 h-2 rounded-full transition-all duration-300 cursor-pointer ${
-                            index === currentSlide
-                              ? "bg-white w-3 sm:w-4"
-                              : "bg-white/50 hover:bg-white/80"
-                          }`}
-                          aria-label={`Go to slide ${index + 1}`}
-                        />
-                      ))}
+              {/* Right Content – Responsive Hero Visuals */}
+              <div className="flex-1 w-full order-1 lg:order-2">
+                {/* Desktop / Tablet: 2x2 Grid */}
+                <div className="hidden lg:grid grid-cols-2 gap-4">
+                  {heroImages.map((img, index) => (
+                    <div
+                      key={index}
+                      className="relative aspect-[4/5] rounded-xl bg-white shadow-xl overflow-hidden"
+                    >
+                      <Image
+                        src={img.src}
+                        alt={img.alt}
+                        fill
+                        className="object-contain p-4"
+                        priority={index < 2}
+                      />
                     </div>
-
-                    {/* Navigation Arrows - Hidden on small screens */}
-                    <button
-                      onClick={() =>
-                        setCurrentSlide((prev) => (prev - 1 + 3) % 3)
-                      }
-                      className="hidden sm:block absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white p-2 rounded-full transition-colors z-10"
-                      aria-label="Previous slide"
-                    >
-                      ‹
-                    </button>
-                    <button
-                      onClick={() => setCurrentSlide((prev) => (prev + 1) % 3)}
-                      className="hidden sm:block absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white p-2 rounded-full transition-colors z-10"
-                      aria-label="Next slide"
-                    >
-                      ›
-                    </button>
-                  </div>
-
-                  {/* "Natural Results" badge */}
-                  <div className="absolute -bottom-3 -right-3 sm:-bottom-4 sm:-right-4 bg-white text-emerald-700 px-3 sm:px-4 py-1 sm:py-2 rounded-lg sm:rounded-xl shadow-xl font-bold text-xs sm:text-sm z-20 whitespace-nowrap">
-                    Natural Results
-                  </div>
-
-                  {/* Decorative circles */}
-                  <div className="absolute -top-3 -left-3 sm:-top-4 sm:-left-4 w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 bg-emerald-300 rounded-full opacity-60"></div>
-                  <div className="absolute -bottom-4 -left-4 sm:-bottom-6 sm:-left-6 w-8 h-8 sm:w-10 sm:h-10 md:w-14 md:h-14 bg-teal-400 rounded-full opacity-40"></div>
+                  ))}
                 </div>
+
+                {/* Mobile: Carousel */}
+                <div className="lg:hidden relative">
+                  <div className="relative aspect-[4/5] rounded-xl bg-white shadow-xl overflow-hidden">
+                    <Image
+                      src={heroImages[currentSlide].src}
+                      alt={heroImages[currentSlide].alt}
+                      fill
+                      className="object-contain p-4 transition-opacity duration-500"
+                      priority
+                    />
+                  </div>
+
+                  {/* Dots */}
+                  <div className="flex justify-center gap-2 mt-4">
+                    {heroImages.map((_, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setCurrentSlide(index)}
+                        className={`h-2 rounded-full transition-all ${currentSlide === index
+                          ? "w-6 bg-white"
+                          : "w-2 bg-white/50"
+                          }`}
+                        aria-label={`Go to slide ${index + 1}`}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                {/* Badge */}
+                <div className="absolute -bottom-4 -right-4 bg-white text-emerald-700 px-4 py-2 rounded-xl shadow-lg font-bold text-sm">
+                  Real Patient Results
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        <section className="py-16 sm:py-20 bg-white border-b border-gray-100">
+          <div className="container mx-auto px-4">
+            <div className="max-w-6xl mx-auto">
+
+              {/* Section Header */}
+              <div className="text-center mb-12">
+                <span className="inline-block text-sm font-semibold text-emerald-600 bg-emerald-50 px-4 py-1 rounded-full mb-4">
+                  Trusted by Patients Worldwide
+                </span>
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">
+                  Proven Results. Measurable Confidence.
+                </h2>
+              </div>
+
+              {/* Stats Grid */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+
+                {/* Stat Card 1 */}
+                <div className="bg-gray-50 rounded-2xl p-6 text-center shadow-sm hover:shadow-md transition-shadow">
+                  <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Users className="w-6 h-6 text-emerald-600" />
+                  </div>
+                  <div className="text-2xl sm:text-3xl font-extrabold text-gray-900">
+                    15,000+
+                  </div>
+                  <p className="text-sm text-gray-600 mt-1">
+                    Patients Assisted
+                  </p>
+                </div>
+
+                {/* Stat Card 2 */}
+                <div className="bg-gray-50 rounded-2xl p-6 text-center shadow-sm hover:shadow-md transition-shadow">
+                  <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Award className="w-6 h-6 text-emerald-600" />
+                  </div>
+                  <div className="text-2xl sm:text-3xl font-extrabold text-gray-900">
+                    20+ Years
+                  </div>
+                  <p className="text-sm text-gray-600 mt-1">
+                    Clinical Experience
+                  </p>
+                </div>
+
+                {/* Stat Card 3 */}
+                <div className="bg-gray-50 rounded-2xl p-6 text-center shadow-sm hover:shadow-md transition-shadow">
+                  <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Shield className="w-6 h-6 text-emerald-600" />
+                  </div>
+                  <div className="text-2xl sm:text-3xl font-extrabold text-gray-900">
+                    98%
+                  </div>
+                  <p className="text-sm text-gray-600 mt-1">
+                    Success Rate
+                  </p>
+                </div>
+
+                {/* Stat Card 4 */}
+                <div className="bg-gray-50 rounded-2xl p-6 text-center shadow-sm hover:shadow-md transition-shadow">
+                  <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Calculator className="w-6 h-6 text-emerald-600" />
+                  </div>
+                  <div className="text-2xl sm:text-3xl font-extrabold text-gray-900">
+                    Certified
+                  </div>
+                  <p className="text-sm text-gray-600 mt-1">
+                    Hair Specialists
+                  </p>
+                </div>
+
               </div>
             </div>
           </div>
         </section>
 
-        <section className="py-5 sm:py-16 bg-white">
-          <div className="container mx-auto px-2 sm:px-4">
-            <div className="flex flex-row justify-between items-center gap-3 sm:gap-6 md:gap-8 max-w-5xl mx-auto">
-              {/* Stat 1 */}
-              <div className="text-center flex-1">
-                <div className="w-10 h-10 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-2 sm:mb-3 md:mb-4">
-                  <Users className="w-4 h-4 sm:w-6 sm:h-6 md:w-8 md:h-8 text-emerald-600" />
-                </div>
-                <h3 className="font-bold text-base sm:text-xl md:text-2xl text-gray-900 mb-0.5 sm:mb-1">
-                  15,000+
-                </h3>
-                <p className="text-gray-600 text-xs sm:text-sm leading-tight">
-                  Happy Patients
-                </p>
-              </div>
-
-              {/* Stat 2 */}
-              <div className="text-center flex-1">
-                <div className="w-10 h-10 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-2 sm:mb-3 md:mb-4">
-                  <Award className="w-4 h-4 sm:w-6 sm:h-6 md:w-8 md:h-8 text-emerald-600" />
-                </div>
-                <h3 className="font-bold text-base sm:text-xl md:text-2xl text-gray-900 mb-0.5 sm:mb-1">
-                  20+ Years
-                </h3>
-                <p className="text-gray-600 text-xs sm:text-sm leading-tight">
-                  Experience
-                </p>
-              </div>
-
-              {/* Stat 3 */}
-              <div className="text-center flex-1">
-                <div className="w-10 h-10 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-2 sm:mb-3 md:mb-4">
-                  <Shield className="w-4 h-4 sm:w-6 sm:h-6 md:w-8 md:h-8 text-emerald-600" />
-                </div>
-                <h3 className="font-bold text-base sm:text-xl md:text-2xl text-gray-900 mb-0.5 sm:mb-1">
-                  98%
-                </h3>
-                <p className="text-gray-600 text-xs sm:text-sm leading-tight">
-                  Success Rate
-                </p>
-              </div>
-
-              {/* Stat 4 */}
-              <div className="text-center flex-1">
-                <div className="w-10 h-10 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-2 sm:mb-3 md:mb-4">
-                  <Calculator className="w-4 h-4 sm:w-6 sm:h-6 md:w-8 md:h-8 text-emerald-600" />
-                </div>
-                <h3 className="font-bold text-base sm:text-xl md:text-2xl text-gray-900 mb-0.5 sm:mb-1">
-                  Certified
-                </h3>
-                <p className="text-gray-600 text-xs sm:text-sm leading-tight">
-                  Specialists
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="py-5 bg-gray-50" id="calculator">
+        <section
+          id="calculator"
+          className="py-16 sm:py-20 bg-gradient-to-b from-gray-50 to-white"
+        >
           <div className="container mx-auto px-4">
             <div className="max-w-7xl mx-auto">
-              <div className="text-center mb-12">
+
+              {/* Section Header */}
+              <div className="text-center max-w-3xl mx-auto mb-14">
+                <span className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-700 bg-emerald-50 px-4 py-1 rounded-full mb-4">
+                  <Calculator className="w-4 h-4" />
+                  Step 1: Hair Loss Assessment
+                </span>
+
                 <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
                   Calculate Your Hair Restoration Needs
                 </h2>
-                <p className="text-gray-600 text-lg max-w-2xl mx-auto mb-6">
-                  Select your hair loss pattern(s) below to get an instant
-                  estimate of the number of grafts you may need for optimal
+
+                <p className="text-gray-600 text-lg">
+                  Select the areas affected by hair loss to receive a clinically guided
+                  estimate of the number of grafts required for natural, balanced
                   results.
                 </p>
+              </div>
 
+              {/* ACCESS STATES */}
+              <div className="space-y-8 mb-12">
+
+                {/* Not signed in */}
                 {!loading && !user && (
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 max-w-2xl mx-auto mb-8">
-                    <Lock className="w-12 h-12 text-blue-600 mx-auto mb-3" />
+                  <div className="max-w-3xl mx-auto bg-blue-50 border border-blue-200 rounded-2xl p-8 text-center">
+                    <Lock className="w-10 h-10 text-blue-600 mx-auto mb-4" />
                     <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                      Sign In to Access Calculator
+                      Sign In to Begin Your Assessment
                     </h3>
-                    <p className="text-gray-600 mb-4">
-                      Create an account or sign in to use our professional hair
-                      graft calculator
+                    <p className="text-gray-600 mb-6">
+                      Create an account or sign in to access our professional hair graft
+                      calculator.
                     </p>
                     <Button
                       onClick={() => setIsAuthModalOpen(true)}
-                      className="bg-blue-600 hover:bg-blue-700"
+                      className="bg-blue-600 hover:bg-blue-700 px-8 py-3 rounded-xl"
                     >
                       Sign In / Create Account
                     </Button>
                   </div>
                 )}
 
+                {/* Signed in but not subscribed */}
                 {!loading && user && !isSubscribed && (
-                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-6 max-w-2xl mx-auto mb-8">
-                    <Lock className="w-12 h-12 text-amber-600 mx-auto mb-3" />
+                  <div className="max-w-3xl mx-auto bg-amber-50 border border-amber-200 rounded-2xl p-8 text-center">
+                    <Lock className="w-10 h-10 text-amber-600 mx-auto mb-4" />
                     <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                      Subscribe to Access Calculator and Result
+                      Unlock Full Calculator Access
                     </h3>
-                    <p className="text-gray-600 mb-4">
-                      Get lifetime access to the calculator for just{" "}
-                      {detectedAmount}
+                    <p className="text-gray-600 mb-6">
+                      Get lifetime access to detailed graft estimates for just{" "}
+                      <strong>{detectedAmount}</strong>.
                     </p>
                     <Button
                       onClick={() => setIsSubscriptionModalOpen(true)}
-                      className="bg-amber-600 hover:bg-amber-700"
+                      className="bg-amber-600 hover:bg-amber-700 px-8 py-3 rounded-xl"
                     >
-                      Subscribe Now - {detectedAmount}
+                      Subscribe Now — {detectedAmount}
                     </Button>
                   </div>
                 )}
+              </div>
 
-                {user && isSubscribed && (
-                  <div className="flex flex-col items-center gap-6 mb-8">
-                    <div className="flex justify-center gap-4">
-                      <button
-                        onClick={() => setGenderPreference("neutral")}
-                        className={`px-6 py-3 rounded-lg font-medium transition-all ${
-                          genderPreference === "neutral"
-                            ? "bg-emerald-600 text-white shadow-md"
-                            : "bg-white text-gray-700 hover:bg-gray-100"
-                        }`}
-                      >
-                        Neutral
-                      </button>
-                      <button
-                        onClick={() => setGenderPreference("male")}
-                        className={`px-6 py-3 rounded-lg font-medium transition-all ${
-                          genderPreference === "male"
-                            ? "bg-emerald-600 text-white shadow-md"
-                            : "bg-white text-gray-700 hover:bg-gray-100"
-                        }`}
-                      >
-                        Male
-                      </button>
-                      <button
-                        onClick={() => setGenderPreference("female")}
-                        className={`px-6 py-3 rounded-lg font-medium transition-all ${
-                          genderPreference === "female"
-                            ? "bg-emerald-600 text-white shadow-md"
-                            : "bg-white text-gray-700 hover:bg-gray-100"
-                        }`}
-                      >
-                        Female
-                      </button>
+              {/* ACTIVE CALCULATOR */}
+              {user && isSubscribed && (
+                <div className="space-y-10">
+
+                  {/* Gender Preference */}
+                  <div className="flex flex-col items-center gap-4">
+                    <p className="text-sm text-gray-500">
+                      Select reference pattern
+                    </p>
+
+                    <div className="inline-flex bg-gray-100 rounded-2xl p-1 shadow-inner">
+                      {[
+                        { key: "neutral", label: "Neutral" },
+                        { key: "male", label: "Male" },
+                        { key: "female", label: "Female" },
+                      ].map((option) => (
+                        <button
+                          key={option.key}
+                          onClick={() =>
+                            setGenderPreference(option.key as GenderPreference)
+                          }
+                          className={`px-6 py-2.5 rounded-xl font-medium text-sm transition-all ${genderPreference === option.key
+                            ? "bg-white text-emerald-700 shadow"
+                            : "text-gray-600 hover:text-gray-900"
+                            }`}
+                        >
+                          {option.label}
+                        </button>
+                      ))}
                     </div>
 
                     {selectedTypes.length > 0 && (
-                      <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-4 text-sm">
                         <span className="text-gray-600">
                           {selectedTypes.length} area
                           {selectedTypes.length !== 1 ? "s" : ""} selected
                         </span>
                         <button
                           onClick={() => setSelectedTypes([])}
-                          className="text-sm text-gray-600 hover:text-red-600 hover:underline"
+                          className="text-gray-500 hover:text-red-600 underline underline-offset-4"
                         >
-                          Clear All
+                          Clear selection
                         </button>
                       </div>
                     )}
                   </div>
-                )}
-              </div>
 
-              <BaldnessTypeGrid
-                types={baldnessTypes}
-                selectedTypes={selectedTypes}
-                onSelectType={handleSelectType}
-                genderPreference={genderPreference}
-                disabled={!user || !isSubscribed}
-              />
-
-              {selectedTypes.length > 0 && user && isSubscribed && (
-                <div
-                  id="results"
-                  className="mt-12 animate-in fade-in slide-in-from-bottom-4 duration-500"
-                >
-                  <ResultPanel
+                  {/* Baldness Grid */}
+                  <BaldnessTypeGrid
+                    types={baldnessTypes}
                     selectedTypes={selectedTypes}
-                    onConsultationClick={() => setIsConsultationModalOpen(true)}
-                    totals={totals}
+                    onSelectType={handleSelectType}
+                    genderPreference={genderPreference}
+                    disabled={!user || !isSubscribed}
                   />
+
+                  {/* Results */}
+                  {selectedTypes.length > 0 && (
+                    <div
+                      id="results"
+                      className="animate-in fade-in slide-in-from-bottom-4 duration-500"
+                    >
+                      <ResultPanel
+                        selectedTypes={selectedTypes}
+                        onConsultationClick={() =>
+                          setIsConsultationModalOpen(true)
+                        }
+                        totals={totals}
+                      />
+                    </div>
+                  )}
                 </div>
               )}
             </div>
           </div>
         </section>
 
-        <section className="py-20 bg-gradient-to-br from-gray-900 to-gray-800 text-white">
-          <div className="container mx-auto px-4">
-            <div className="max-w-4xl mx-auto text-center">
-              <h2 className="text-3xl md:text-4xl font-bold mb-6">
-                Why Choose Our Hair Restoration Services?
+        <section className="py-20 bg-gradient-to-b from-white to-gray-50">
+          <div className="container mx-auto px-4 max-w-7xl">
+
+            {/* Section Header */}
+            <div className="text-center max-w-3xl mx-auto mb-16">
+              <span className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-700 bg-emerald-50 px-4 py-1 rounded-full mb-4">
+                Step 2: Area-Based Estimation
+              </span>
+
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                Visualize Affected Areas for Greater Accuracy
               </h2>
-              <p className="text-gray-300 text-lg mb-12">
-                We combine advanced techniques with personalized care to deliver
-                natural, lasting results
+
+              <p className="text-gray-600 text-lg">
+                Interact with the 3D head model to select specific areas of hair loss.
+                Your selections will instantly refine the graft estimation.
               </p>
-              <div className="grid md:grid-cols-3 gap-8">
-                <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
-                  <div className="w-12 h-12 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Award className="w-6 h-6" />
-                  </div>
-                  <h3 className="font-semibold text-xl mb-3">Expert Team</h3>
-                  <p className="text-gray-300 text-sm">
-                    Board-certified surgeons with decades of combined experience
-                    in hair restoration
-                  </p>
-                </div>
-                <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
-                  <div className="w-12 h-12 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Shield className="w-6 h-6" />
-                  </div>
-                  <h3 className="font-semibold text-xl mb-3">Safe & Proven</h3>
-                  <p className="text-gray-300 text-sm">
-                    FDA-approved techniques with comprehensive safety protocols
-                    and sterile environments
-                  </p>
-                </div>
-                <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
-                  <div className="w-12 h-12 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Users className="w-6 h-6" />
-                  </div>
-                  <h3 className="font-semibold text-xl mb-3">
-                    Personalized Care
+            </div>
+
+            {/* Workspace */}
+            <div className="grid md:grid-cols-2 gap-10 items-stretch">
+
+              {/* 3D Head Card */}
+              <div className="bg-white rounded-3xl shadow-lg border border-gray-100 p-6 flex flex-col">
+                <div className="mb-4">
+                  <h3 className="text-xl font-semibold text-gray-900 mb-1">
+                    3D Scalp Visualization
                   </h3>
-                  <p className="text-gray-300 text-sm">
-                    Customized treatment plans tailored to your unique hair
-                    characteristics and goals
+                  <p className="text-sm text-gray-500">
+                    Click on areas of thinning or baldness
                   </p>
                 </div>
+
+                <div className="flex-1 rounded-2xl overflow-hidden bg-gray-50">
+                  <HairSpline
+                    onAreaSelect={(area) => setSelectedArea(area)}
+                  />
+                </div>
+
+                <div className="mt-4 text-xs text-gray-400">
+                  Tip: Rotate the model to inspect all angles
+                </div>
+              </div>
+
+              {/* Calculator Card */}
+              <div className="bg-white rounded-3xl shadow-lg border border-gray-100 p-6 flex flex-col">
+                <div className="mb-4">
+                  <h3 className="text-xl font-semibold text-gray-900 mb-1">
+                    Area-Based Graft Calculator
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                    Selected areas automatically populate below
+                  </p>
+                </div>
+
+                <div className="flex-1">
+                  <HairGraftCalculator
+                    externalArea={selectedArea ?? undefined}
+                  />
+                </div>
+
+                <div className="mt-4 text-xs text-gray-400">
+                  Calculations are based on average follicular unit density
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        <section className="py-24 bg-gradient-to-br from-gray-950 via-gray-900 to-gray-800 text-white relative overflow-hidden">
+          {/* Subtle grid overlay */}
+          <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_1px_1px,white_1px,transparent_0)] bg-[length:32px_32px]" />
+
+          <div className="container mx-auto px-4 relative z-10">
+            <div className="max-w-7xl mx-auto">
+
+              {/* Header */}
+              <div className="max-w-3xl mb-16">
+                <span className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-400 bg-emerald-400/10 px-4 py-1 rounded-full mb-4">
+                  Clinical Excellence
+                </span>
+
+                <h2 className="text-3xl md:text-4xl font-bold leading-tight mb-4">
+                  Why Patients Trust Our Hair
+                  <br className="hidden sm:block" />
+                  Restoration Expertise
+                </h2>
+
+                <p className="text-gray-300 text-lg">
+                  Our approach combines medical precision, advanced technology,
+                  and personalized planning to deliver natural, long-lasting
+                  hair restoration outcomes.
+                </p>
+              </div>
+
+              {/* Content Grid */}
+              <div className="grid md:grid-cols-2 gap-10 items-start">
+
+                {/* LEFT – Core Pillars */}
+                <div className="space-y-6">
+
+                  {/* Pillar 1 */}
+                  <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-sm">
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 bg-emerald-500/20 rounded-xl flex items-center justify-center">
+                        <Award className="w-6 h-6 text-emerald-400" />
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-semibold mb-2">
+                          Expert-Led Procedures
+                        </h3>
+                        <p className="text-gray-300 text-sm leading-relaxed">
+                          All assessments and procedures are guided by
+                          board-certified specialists with decades of
+                          combined experience in modern hair restoration.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Pillar 2 */}
+                  <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-sm">
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 bg-emerald-500/20 rounded-xl flex items-center justify-center">
+                        <Shield className="w-6 h-6 text-emerald-400" />
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-semibold mb-2">
+                          Safe, Proven Techniques
+                        </h3>
+                        <p className="text-gray-300 text-sm leading-relaxed">
+                          We use globally recognized, FDA-approved
+                          techniques supported by strict safety protocols
+                          and sterile clinical environments.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Pillar 3 */}
+                  <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-sm">
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 bg-emerald-500/20 rounded-xl flex items-center justify-center">
+                        <Users className="w-6 h-6 text-emerald-400" />
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-semibold mb-2">
+                          Personalized Treatment Planning
+                        </h3>
+                        <p className="text-gray-300 text-sm leading-relaxed">
+                          Every graft estimate and treatment plan is
+                          customized to your hair type, density, and
+                          long-term restoration goals.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* RIGHT – Differentiation Card */}
+                <div className="bg-gradient-to-br from-emerald-600 to-teal-600 rounded-3xl p-8 shadow-xl">
+                  <h3 className="text-2xl font-bold mb-4">
+                    What Makes Us Different
+                  </h3>
+
+                  <ul className="space-y-4 text-sm">
+                    <li className="flex items-start gap-3">
+                      <span className="mt-1 w-2 h-2 bg-white rounded-full" />
+                      Clinically guided graft estimation — not guesswork
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <span className="mt-1 w-2 h-2 bg-white rounded-full" />
+                      Area-by-area precision using 3D scalp visualization
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <span className="mt-1 w-2 h-2 bg-white rounded-full" />
+                      Designed to support both Afro-textured and straight hair
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <span className="mt-1 w-2 h-2 bg-white rounded-full" />
+                      Transparent methodology backed by clinical experience
+                    </li>
+                  </ul>
+
+                  <div className="mt-8">
+                    <button
+                      onClick={() => {
+                        const calculatorSection =
+                          document.getElementById("calculator");
+                        if (calculatorSection) {
+                          calculatorSection.scrollIntoView({
+                            behavior: "smooth",
+                            block: "start",
+                          });
+                        }
+                      }}
+                      className="bg-white text-emerald-700 font-semibold px-6 py-3 rounded-xl hover:bg-emerald-50 transition-all shadow-lg"
+                    >
+                      Start Your Assessment
+                    </button>
+                  </div>
+                </div>
+
               </div>
             </div>
           </div>
         </section>
+
 
         <FAQSection />
 
@@ -580,11 +815,10 @@ export default function Home() {
                     }
                   }}
                   disabled={!loading && !isSubscribed}
-                  className={`${
-                    user && isSubscribed
-                      ? "bg-white text-emerald-600 hover:bg-emerald-50 hover:shadow-xl cursor-pointer"
-                      : "bg-white/80 text-emerald-600/70 cursor-not-allowed opacity-75"
-                  } font-semibold px-8 py-4 rounded-lg text-lg transition-all duration-300 shadow-lg relative pr-16`}
+                  className={`${user && isSubscribed
+                    ? "bg-white text-emerald-600 hover:bg-emerald-50 hover:shadow-xl cursor-pointer"
+                    : "bg-white/80 text-emerald-600/70 cursor-not-allowed opacity-75"
+                    } font-semibold px-8 py-4 rounded-lg text-lg transition-all duration-300 shadow-lg relative pr-16`}
                 >
                   Schedule a Consultation
                   {!loading && !isSubscribed && (
