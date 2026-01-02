@@ -1,8 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react"; // Add useEffect import
-import { Header } from "@/components/layout/header";
-import { Footer } from "@/components/layout/footer";
 import { BaldnessTypeGrid } from "@/components/calculator/baldness-type-grid";
 import { ResultPanel } from "@/components/calculator/result-panel";
 import { ConsultationFormModal } from "@/components/calculator/consultation-form-modal";
@@ -20,6 +18,15 @@ import HairSpline from "@/components/HairSpline";
 import HairGraftCalculator from "@/components/HairCalculator";
 import { AreaKey } from "@/lib/spline-area-map";
 import Image from "next/image";
+import { sanityClient } from "@/lib/sanityClient";
+import Link from 'next/link';
+import {
+  Scissors,
+  Syringe,
+  Sparkles,
+  Brush,
+  UserCheck,
+} from "lucide-react";
 
 
 export default function Home() {
@@ -51,6 +58,30 @@ export default function Home() {
     { src: "/African-lady.png", alt: "Female afro hair transplant result" },
   ];
 
+  const LATEST_BLOGS_QUERY = `
+*[_type == "blog" && discoverEligible == true]
+| order(publishedAt desc)[0..2] {
+  title,
+  slug,
+  excerpt,
+  publishedAt,
+  mainImage
+}
+`;
+
+  const [latestBlogs, setLatestBlogs] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchBlogs = async () => {
+      try {
+        const blogs = await sanityClient.fetch(LATEST_BLOGS_QUERY);
+        setLatestBlogs(blogs);
+      } catch (err) {
+        console.error("Error fetching blogs:", err);
+      }
+    };
+    fetchBlogs();
+  }, []);
 
 
   // Auto-slide carousel
@@ -203,7 +234,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header />
 
       <main className="pt-20">
         <section className="relative bg-gradient-to-br from-emerald-600 via-teal-600 to-emerald-700 text-white py-12 md:py-16 lg:py-24 overflow-hidden">
@@ -430,6 +460,138 @@ export default function Home() {
 
               </div>
             </div>
+          </div>
+        </section>
+
+        <section className="py-24 bg-white border-b border-gray-100">
+          <div className="container mx-auto px-4 max-w-7xl">
+
+            {/* Section Header */}
+            <div className="text-center max-w-3xl mx-auto mb-16">
+              <span className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-700 bg-emerald-50 px-4 py-1 rounded-full mb-4">
+                Our Services
+              </span>
+
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                Comprehensive Hair Restoration Solutions
+              </h2>
+
+              <p className="text-gray-600 text-lg leading-relaxed">
+                ArtisticBuz offers a full range of medically guided hair restoration
+                services — combining surgical precision, regenerative treatments,
+                and aesthetic refinement to achieve natural, long-lasting results.
+              </p>
+            </div>
+
+            {/* Services Grid */}
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+
+              {/* FUE */}
+              <div className="bg-gray-50 rounded-3xl p-8 hover:shadow-lg transition-shadow">
+                <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center mb-5">
+                  <Scissors className="w-6 h-6 text-emerald-600" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                  FUE Hair Transplant
+                </h3>
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  Follicular Unit Extraction (FUE) is a minimally invasive technique
+                  where individual hair follicles are harvested and implanted for
+                  natural density with minimal scarring and faster recovery.
+                </p>
+              </div>
+
+              {/* FUT */}
+              <div className="bg-gray-50 rounded-3xl p-8 hover:shadow-lg transition-shadow">
+                <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center mb-5">
+                  <Brush className="w-6 h-6 text-emerald-600" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                  FUT Hair Transplant
+                </h3>
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  Follicular Unit Transplantation (FUT) is ideal for advanced hair loss
+                  cases, allowing a higher graft yield through strip harvesting while
+                  maintaining excellent cosmetic outcomes.
+                </p>
+              </div>
+
+              {/* Beard */}
+              <div className="bg-gray-50 rounded-3xl p-8 hover:shadow-lg transition-shadow">
+                <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center mb-5">
+                  <UserCheck className="w-6 h-6 text-emerald-600" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                  Beard Transplant
+                </h3>
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  Designed for men with patchy or thin facial hair, beard transplants
+                  restore fullness and symmetry using precise angle-controlled
+                  implantation.
+                </p>
+              </div>
+
+              {/* Eyebrow */}
+              <div className="bg-gray-50 rounded-3xl p-8 hover:shadow-lg transition-shadow">
+                <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center mb-5">
+                  <Sparkles className="w-6 h-6 text-emerald-600" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                  Eyebrow Transplant
+                </h3>
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  A highly artistic procedure that restores eyebrow shape and density,
+                  customized to facial structure, gender, and natural growth direction.
+                </p>
+              </div>
+
+              {/* PRP */}
+              <div className="bg-gray-50 rounded-3xl p-8 hover:shadow-lg transition-shadow">
+                <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center mb-5">
+                  <Syringe className="w-6 h-6 text-emerald-600" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                  PRP Treatment
+                </h3>
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  Platelet-Rich Plasma (PRP) therapy stimulates dormant follicles,
+                  improves graft survival, and strengthens existing hair using your
+                  body’s natural growth factors.
+                </p>
+              </div>
+
+              {/* SMP */}
+              <div className="bg-gray-50 rounded-3xl p-8 hover:shadow-lg transition-shadow">
+                <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center mb-5">
+                  <Brush className="w-6 h-6 text-emerald-600" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                  Scalp Micropigmentation (SMP)
+                </h3>
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  A non-surgical cosmetic solution that creates the appearance of fuller
+                  hair or a clean shaved look by depositing medical-grade pigment into
+                  the scalp.
+                </p>
+              </div>
+
+            </div>
+
+            {/* CTA */}
+            <div className="text-center mt-16">
+              <button
+                onClick={() => {
+                  const calculatorSection = document.getElementById("calculator");
+                  if (calculatorSection) {
+                    calculatorSection.scrollIntoView({ behavior: "smooth" });
+                  }
+                }}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-8 py-4 rounded-xl shadow-lg transition-all"
+              >
+                Calculate Your Graft Requirement
+              </button>
+            </div>
+
           </div>
         </section>
 
@@ -788,23 +950,115 @@ export default function Home() {
           </div>
         </section>
 
+        <section className="py-28 bg-gray-50">
+          <div className="container mx-auto px-4 max-w-6xl">
+            {/* Section Header */}
+            <div className="mb-14 flex items-center justify-between">
+              <div>
+                <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+                  Latest Insights
+                </h2>
+                <p className="text-gray-600 max-w-xl">
+                  Expert insights, guides, and updates to help you make informed decisions.
+                </p>
+              </div>
+
+              <Link
+                href="/blog"
+                className="hidden md:inline-flex text-sm font-semibold text-emerald-600 hover:text-emerald-700"
+              >
+                View all →
+              </Link>
+            </div>
+
+            {/* Blog Cards */}
+            <div className="grid gap-8 md:grid-cols-3">
+              {latestBlogs.map((blog: any) => (
+                <article
+                  key={blog.slug.current}
+                  className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300"
+                >
+                  {/* Image */}
+                  {blog.mainImage && (
+                    <div className="relative h-48 w-full overflow-hidden">
+                      <img
+                        src={blog.mainImage}
+                        alt={blog.title}
+                        className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    </div>
+                  )}
+
+                  {/* Content */}
+                  <div className="p-6 flex flex-col h-full">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-3 leading-snug group-hover:text-emerald-600 transition-colors">
+                      {blog.title}
+                    </h3>
+
+                    <p className="text-sm text-gray-600 mb-6 line-clamp-3">
+                      {blog.excerpt}
+                    </p>
+
+                    <div className="mt-auto">
+                      <Link
+                        href={`/blog/${blog.slug.current}`}
+                        className="inline-flex items-center text-sm font-semibold text-emerald-600 hover:text-emerald-700"
+                      >
+                        Read article
+                        <span className="ml-1 transition-transform group-hover:translate-x-1">
+                          →
+                        </span>
+                      </Link>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+
+            {/* Mobile CTA */}
+            <div className="mt-12 text-center md:hidden">
+              <Link
+                href="/blog"
+                className="inline-flex text-sm font-semibold text-emerald-600 hover:text-emerald-700"
+              >
+                View all articles →
+              </Link>
+            </div>
+          </div>
+        </section>
+
 
         <FAQSection />
 
-        <section className="py-20 bg-gradient-to-br from-emerald-600 to-teal-700 text-white">
-          <div className="container mx-auto px-4">
-            <div className="max-w-3xl mx-auto text-center">
-              <h2 className="text-3xl md:text-4xl font-bold mb-6">
-                Ready to Start Your Hair Restoration Journey?
+        <section className="py-28 bg-gradient-to-br from-emerald-700 via-emerald-600 to-teal-700 text-white relative overflow-hidden">
+          {/* Subtle pattern overlay */}
+          <div className="absolute inset-0 opacity-15 bg-[radial-gradient(circle_at_1px_1px,white_1px,transparent_0)] bg-[length:36px_36px]" />
+
+          <div className="container mx-auto px-4 relative z-10">
+            <div className="max-w-4xl mx-auto text-center">
+
+              {/* Trust framing */}
+              <span className="inline-block text-sm font-semibold text-white/90 bg-white/10 px-4 py-1 rounded-full mb-5">
+                Final Step
+              </span>
+
+              <h2 className="text-3xl md:text-4xl font-bold mb-6 leading-tight">
+                Take the Next Step Toward
+                <br className="hidden sm:block" />
+                Confident, Natural Hair Restoration
               </h2>
-              <p className="text-emerald-50 text-lg mb-8">
-                Consult our specialists and receive a
-                personalized treatment plan
+
+              <p className="text-emerald-50 text-lg max-w-2xl mx-auto mb-10">
+                Your graft estimate is the foundation. A specialist consultation
+                transforms it into a safe, personalized treatment plan designed
+                for long-term results.
               </p>
-              <div className="relative inline-block">
+
+              {/* CTA Button */}
+              <div className="relative inline-flex flex-col items-center">
+
                 <button
                   onClick={() => {
-                    // Only works when subscribed
                     const calculatorSection =
                       document.getElementById("calculator");
                     if (calculatorSection) {
@@ -816,24 +1070,31 @@ export default function Home() {
                   }}
                   disabled={!loading && !isSubscribed}
                   className={`${user && isSubscribed
-                    ? "bg-white text-emerald-600 hover:bg-emerald-50 hover:shadow-xl cursor-pointer"
-                    : "bg-white/80 text-emerald-600/70 cursor-not-allowed opacity-75"
-                    } font-semibold px-8 py-4 rounded-lg text-lg transition-all duration-300 shadow-lg relative pr-16`}
+                    ? "bg-white text-emerald-700 hover:bg-emerald-50 hover:shadow-2xl cursor-pointer"
+                    : "bg-white/80 text-emerald-700/70 cursor-not-allowed opacity-80"
+                    } font-semibold px-10 py-5 rounded-xl text-lg transition-all duration-300 shadow-xl relative pr-16`}
                 >
-                  Schedule a Consultation
+                  Book a Specialist Consultation
+
                   {!loading && !isSubscribed && (
                     <span className="absolute -top-2 -right-2 bg-amber-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg">
-                      SUBSCRIBE
+                      Subscription Required
                     </span>
                   )}
                 </button>
+
+                {/* Reassurance text */}
+                <p className="mt-4 text-sm text-white/80 max-w-md">
+                  No obligation. Your consultation focuses on assessment,
+                  safety, and realistic expectations — not pressure.
+                </p>
               </div>
+
             </div>
           </div>
         </section>
-      </main>
 
-      <Footer />
+      </main>
 
       <AuthModal
         isOpen={isAuthModalOpen}
