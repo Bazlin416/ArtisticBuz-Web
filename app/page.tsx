@@ -27,6 +27,7 @@ import {
   Brush,
   UserCheck,
 } from "lucide-react";
+import { urlFor } from '@/lib/sanityImage'
 
 
 export default function Home() {
@@ -62,12 +63,15 @@ export default function Home() {
 *[_type == "blog" && discoverEligible == true]
 | order(publishedAt desc)[0..2] {
   title,
+  seoTitle,
   slug,
   excerpt,
   publishedAt,
+  topic,
   mainImage
 }
-`;
+`
+
 
   const [latestBlogs, setLatestBlogs] = useState<any[]>([]);
 
@@ -595,6 +599,76 @@ export default function Home() {
           </div>
         </section>
 
+        <section className="py-20 bg-gradient-to-b from-white to-gray-50">
+          <div className="container mx-auto px-4 max-w-7xl">
+
+            {/* Section Header */}
+            <div className="text-center max-w-3xl mx-auto mb-16">
+              <span className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-700 bg-emerald-50 px-4 py-1 rounded-full mb-4">
+                Step 1: Area-Based Estimation
+              </span>
+
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                Visualize Affected Areas for Greater Accuracy
+              </h2>
+
+              <p className="text-gray-600 text-lg">
+                Interact with the 3D head model to select specific areas of hair loss.
+                Your selections will instantly refine the graft estimation.
+              </p>
+            </div>
+
+            {/* Workspace */}
+            <div className="grid md:grid-cols-2 gap-10 items-stretch">
+
+              {/* 3D Head Card */}
+              <div className="bg-white rounded-3xl shadow-lg border border-gray-100 p-6 flex flex-col">
+                <div className="mb-4">
+                  <h3 className="text-xl font-semibold text-gray-900 mb-1">
+                    3D Scalp Visualization
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                    Click on areas of thinning or baldness
+                  </p>
+                </div>
+
+                <div className="flex-1 rounded-2xl overflow-hidden bg-gray-50">
+                  <HairSpline
+                    onAreaSelect={(area) => setSelectedArea(area)}
+                  />
+                </div>
+
+                <div className="mt-4 text-xs text-gray-400">
+                  Tip: Rotate the model to inspect all angles
+                </div>
+              </div>
+
+              {/* Calculator Card */}
+              <div className="bg-white rounded-3xl shadow-lg border border-gray-100 p-6 flex flex-col">
+                <div className="mb-4">
+                  <h3 className="text-xl font-semibold text-gray-900 mb-1">
+                    Area-Based Graft Calculator
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                    Selected areas automatically populate below
+                  </p>
+                </div>
+
+                <div className="flex-1">
+                  <HairGraftCalculator
+                    externalArea={selectedArea ?? undefined}
+                  />
+                </div>
+
+                <div className="mt-4 text-xs text-gray-400">
+                  Calculations are based on average follicular unit density
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
         <section
           id="calculator"
           className="py-16 sm:py-20 bg-gradient-to-b from-gray-50 to-white"
@@ -606,7 +680,7 @@ export default function Home() {
               <div className="text-center max-w-3xl mx-auto mb-14">
                 <span className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-700 bg-emerald-50 px-4 py-1 rounded-full mb-4">
                   <Calculator className="w-4 h-4" />
-                  Step 1: Hair Loss Assessment
+                  Step 2: Hair Loss Assessment
                 </span>
 
                 <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
@@ -737,76 +811,6 @@ export default function Home() {
                   )}
                 </div>
               )}
-            </div>
-          </div>
-        </section>
-
-        <section className="py-20 bg-gradient-to-b from-white to-gray-50">
-          <div className="container mx-auto px-4 max-w-7xl">
-
-            {/* Section Header */}
-            <div className="text-center max-w-3xl mx-auto mb-16">
-              <span className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-700 bg-emerald-50 px-4 py-1 rounded-full mb-4">
-                Step 2: Area-Based Estimation
-              </span>
-
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                Visualize Affected Areas for Greater Accuracy
-              </h2>
-
-              <p className="text-gray-600 text-lg">
-                Interact with the 3D head model to select specific areas of hair loss.
-                Your selections will instantly refine the graft estimation.
-              </p>
-            </div>
-
-            {/* Workspace */}
-            <div className="grid md:grid-cols-2 gap-10 items-stretch">
-
-              {/* 3D Head Card */}
-              <div className="bg-white rounded-3xl shadow-lg border border-gray-100 p-6 flex flex-col">
-                <div className="mb-4">
-                  <h3 className="text-xl font-semibold text-gray-900 mb-1">
-                    3D Scalp Visualization
-                  </h3>
-                  <p className="text-sm text-gray-500">
-                    Click on areas of thinning or baldness
-                  </p>
-                </div>
-
-                <div className="flex-1 rounded-2xl overflow-hidden bg-gray-50">
-                  <HairSpline
-                    onAreaSelect={(area) => setSelectedArea(area)}
-                  />
-                </div>
-
-                <div className="mt-4 text-xs text-gray-400">
-                  Tip: Rotate the model to inspect all angles
-                </div>
-              </div>
-
-              {/* Calculator Card */}
-              <div className="bg-white rounded-3xl shadow-lg border border-gray-100 p-6 flex flex-col">
-                <div className="mb-4">
-                  <h3 className="text-xl font-semibold text-gray-900 mb-1">
-                    Area-Based Graft Calculator
-                  </h3>
-                  <p className="text-sm text-gray-500">
-                    Selected areas automatically populate below
-                  </p>
-                </div>
-
-                <div className="flex-1">
-                  <HairGraftCalculator
-                    externalArea={selectedArea ?? undefined}
-                  />
-                </div>
-
-                <div className="mt-4 text-xs text-gray-400">
-                  Calculations are based on average follicular unit density
-                </div>
-              </div>
-
             </div>
           </div>
         </section>
@@ -964,7 +968,7 @@ export default function Home() {
               </div>
 
               <Link
-                href="/blog"
+                href="/blogs"
                 className="hidden md:inline-flex text-sm font-semibold text-emerald-600 hover:text-emerald-700"
               >
                 View all →
@@ -976,49 +980,51 @@ export default function Home() {
               {latestBlogs.map((blog: any) => (
                 <article
                   key={blog.slug.current}
-                  className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300"
+                  className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col"
                 >
                   {/* Image */}
                   {blog.mainImage && (
                     <div className="relative h-48 w-full overflow-hidden">
                       <img
-                        src={blog.mainImage}
-                        alt={blog.title}
+                        src={urlFor(blog.mainImage).width(600).height(400).url()}
+                        alt={blog.seoTitle || blog.title}
                         className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
                       />
                     </div>
                   )}
 
                   {/* Content */}
-                  <div className="p-6 flex flex-col h-full">
+                  <div className="p-6 flex flex-col flex-1">
                     <h3 className="text-lg font-semibold text-gray-900 mb-3 leading-snug group-hover:text-emerald-600 transition-colors">
-                      {blog.title}
+                      {blog.seoTitle || blog.title}
                     </h3>
 
                     <p className="text-sm text-gray-600 mb-6 line-clamp-3">
                       {blog.excerpt}
                     </p>
 
+                    {/* Read More Button */}
                     <div className="mt-auto">
                       <Link
-                        href={`/blog/${blog.slug.current}`}
-                        className="inline-flex items-center text-sm font-semibold text-emerald-600 hover:text-emerald-700"
+                        href={`/blogs/${blog.slug.current}`}
+                        className="inline-flex items-center justify-center rounded-xl border border-emerald-600 px-5 py-2.5 text-sm font-semibold text-emerald-600 transition-all hover:bg-emerald-600 hover:text-white"
                       >
-                        Read article
-                        <span className="ml-1 transition-transform group-hover:translate-x-1">
+                        Read more
+                        <span className="ml-2 transition-transform group-hover:translate-x-1">
                           →
                         </span>
                       </Link>
                     </div>
                   </div>
                 </article>
+
               ))}
             </div>
 
             {/* Mobile CTA */}
             <div className="mt-12 text-center md:hidden">
               <Link
-                href="/blog"
+                href="/blogs"
                 className="inline-flex text-sm font-semibold text-emerald-600 hover:text-emerald-700"
               >
                 View all articles →

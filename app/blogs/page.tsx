@@ -7,6 +7,7 @@ const BLOG_QUERY = `
 *[_type == "blog" && discoverEligible == true]
 | order(publishedAt desc) {
   title,
+  seoTitle,
   slug,
   excerpt,
   publishedAt,
@@ -51,14 +52,16 @@ export default async function BlogPage() {
                             className="grid gap-10 md:grid-cols-3 items-start"
                         >
                             {/* Image */}
-                            <Link href={`/blog/${blog.slug.current}`} className="group">
-                                <Image
-                                    src={urlFor(blog.mainImage).width(700).height(460).url()}
-                                    alt={blog.title}
-                                    width={700}
-                                    height={460}
-                                    className="rounded-3xl object-cover transition group-hover:opacity-90"
-                                />
+                            <Link href={`/blogs/${blog.slug.current}`} className="group">
+                                {blog.mainImage && (
+                                    <Image
+                                        src={urlFor(blog.mainImage).width(700).height(460).url()}
+                                        alt={blog.seoTitle || blog.title}
+                                        width={700}
+                                        height={460}
+                                        className="rounded-3xl object-cover transition group-hover:opacity-90"
+                                    />
+                                )}
                             </Link>
 
                             {/* Content */}
@@ -71,10 +74,10 @@ export default async function BlogPage() {
 
                                 <h2 className="text-2xl md:text-3xl font-semibold mb-4 leading-snug">
                                     <Link
-                                        href={`/blog/${blog.slug.current}`}
+                                        href={`/blogs/${blog.slug.current}`}
                                         className="hover:text-emerald-600 transition"
                                     >
-                                        {blog.title}
+                                        {blog.seoTitle || blog.title}
                                     </Link>
                                 </h2>
 
@@ -88,7 +91,7 @@ export default async function BlogPage() {
                                     </time>
 
                                     <Link
-                                        href={`/blog/${blog.slug.current}`}
+                                        href={`/blogs/${blog.slug.current}`}
                                         className="text-sm font-semibold text-emerald-600 hover:text-emerald-700"
                                     >
                                         Read article →
@@ -102,6 +105,7 @@ export default async function BlogPage() {
         </section>
     )
 }
+
 
 
 

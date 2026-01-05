@@ -29,7 +29,7 @@ export function Header() {
 
   const navItems = [
     { label: 'Home', href: '/' },
-    { label: 'Blog', href: '/blog' },
+    { label: 'Blogs', href: '/blogs' },
   ];
 
   return (
@@ -65,7 +65,7 @@ export function Header() {
                 href={item.href}
                 className="text-sm font-medium text-gray-300 hover:text-emerald-400 transition-colors flex items-center gap-1"
               >
-                {item.label === 'Blog' && <BookOpen className="w-4 h-4" />}
+                {item.label === 'Blogs' && <BookOpen className="w-4 h-4" />}
                 {item.label}
               </Link>
             ))}
