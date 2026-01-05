@@ -56,10 +56,10 @@ export function Footer() {
 
               <li>
                 <Link
-                  href="/blog"
+                  href="/blogs"
                   className="text-sm text-gray-400 hover:text-emerald-400 transition-colors"
                 >
-                  Blog
+                  Blogs
                 </Link>
               </li>
             </ul>
@@ -72,25 +72,10 @@ export function Footer() {
             </h3>
 
             <ul className="space-y-4 text-sm">
-              <li className="flex items-start gap-3">
-                <MapPin className="w-5 h-5 text-emerald-500 mt-0.5 shrink-0" />
-                <span className="text-gray-400">
-                  Riverside Drive, Daphton Court<br />
-                  Suite A3
-                </span>
-              </li>
-
-              <li className="flex items-center gap-3">
-                <Phone className="w-5 h-5 text-emerald-500 shrink-0" />
-                <span className="text-gray-400">
-                  +254 722 691 272
-                </span>
-              </li>
-
               <li className="flex items-center gap-3">
                 <Mail className="w-5 h-5 text-emerald-500 shrink-0" />
                 <span className="text-gray-400">
-                  jared.babu@artisticclinic.com
+                  info@artisticbuz.com
                 </span>
               </li>
             </ul>

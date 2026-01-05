@@ -12,19 +12,19 @@ import { HelpCircle } from 'lucide-react';
 export function FAQSection() {
   return (
     <section
-      className="py-24 bg-gradient-to-b from-gray-50 to-white"
+      className="py-28 bg-white"
       id="faq"
     >
-      <div className="container mx-auto px-4">
-        <div className="max-w-4xl mx-auto">
+      <div className="container mx-auto px-4 max-w-7xl">
+        <div className="max-w-7xl mx-auto">
 
           {/* Header */}
           <div className="text-center mb-16">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-emerald-100 rounded-full mb-5">
-              <HelpCircle className="w-8 h-8 text-emerald-600" />
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-emerald-200 to-teal-200 rounded-full mb-5 shadow-lg">
+              <HelpCircle className="w-10 h-10 text-emerald-700" />
             </div>
 
-            <span className="inline-block text-sm font-semibold text-emerald-700 bg-emerald-50 px-4 py-1 rounded-full mb-4">
+            <span className="inline-block text-sm font-semibold text-emerald-700 bg-emerald-50 px-5 py-1.5 rounded-full mb-4">
               Clarifying Common Concerns
             </span>
 
@@ -32,7 +32,7 @@ export function FAQSection() {
               Frequently Asked Questions
             </h2>
 
-            <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+            <p className="text-gray-600 text-lg max-w-7xl mx-auto leading-relaxed">
               Clear, transparent answers to help you understand graft estimation,
               hair transplantation, and what to expect from the process.
             </p>
@@ -44,15 +44,15 @@ export function FAQSection() {
               <AccordionItem
                 key={index}
                 value={`item-${index}`}
-                className="bg-white rounded-2xl border border-gray-200 shadow-sm transition-all hover:shadow-md"
+                className="bg-gradient-to-br from-emerald-50 via-teal-50 to-emerald-100 rounded-3xl border border-gray-200 shadow-md hover:shadow-xl transition-all"
               >
-                <AccordionTrigger className="text-left hover:no-underline px-6 py-6">
-                  <span className="font-semibold text-gray-900 pr-4 leading-snug">
+                <AccordionTrigger className="text-left px-6 py-5 hover:no-underline">
+                  <span className="font-semibold text-gray-900 text-lg">
                     {faq.question}
                   </span>
                 </AccordionTrigger>
 
-                <AccordionContent className="px-6 pb-6 text-gray-600 leading-relaxed">
+                <AccordionContent className="px-6 pb-6 text-gray-700 leading-relaxed text-sm">
                   {faq.answer}
                 </AccordionContent>
               </AccordionItem>
@@ -60,10 +60,9 @@ export function FAQSection() {
           </Accordion>
 
           {/* Soft reassurance footer */}
-          <div className="mt-14 text-center">
-            <p className="text-sm text-gray-500">
-              These answers are based on commonly accepted clinical practices.
-              Individual treatment plans may vary.
+          <div className="mt-16 text-center">
+            <p className="text-sm text-gray-500 max-w-7xl mx-auto">
+              These answers are based on commonly accepted clinical practices. Individual treatment plans may vary.
             </p>
           </div>
 
@@ -72,4 +71,5 @@ export function FAQSection() {
     </section>
   );
 }
+
 
