@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Use the server Supabase client
-    const supabase = createServerSupabaseClient();
+    const supabase = await createServerSupabaseClient();
     if (!supabase) {
       return NextResponse.json(
         { error: 'Database not configured' },

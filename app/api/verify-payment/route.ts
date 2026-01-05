@@ -17,7 +17,7 @@ export async function POST(request: Request) {
       apiVersion: '2025-12-15.clover',
     });
 
-    const supabase = createServerSupabaseClient();
+    const supabase = await createServerSupabaseClient();
     if (!supabase) {
       return NextResponse.json(
         { success: false, error: 'Database not configured' },
