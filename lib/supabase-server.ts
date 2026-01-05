@@ -2,7 +2,7 @@
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 
-export async function Supabase SSR–compliant() {
+export async function createServerSupabaseClient() {
   const cookieStore = await cookies();
 
   return createServerClient(
@@ -19,7 +19,7 @@ export async function Supabase SSR–compliant() {
               cookieStore.set(name, value, options)
             );
           } catch (error) {
-            // Server Components cannot write cookies
+            // Called from a Server Component — safe to ignore
             console.warn('Supabase setAll cookie write blocked:', error);
           }
         },
