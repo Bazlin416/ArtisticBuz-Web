@@ -304,7 +304,8 @@ export function ConsultationFormModal({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          to: 'brianadem2@gmail.com',
+          to: 'jared.babu@artisticclinic.com',
+          cc: 'support@artisticbuz.com',
           subject: `New Hair Consultation Request - ${formData.clientsName.first} ${formData.clientsName.last}`,
           html: generateEmailHTML(formData),
         }),
@@ -1504,7 +1505,7 @@ export function ConsultationFormModal({
                 </div>
                 
                 <div className="text-xs text-gray-500 text-center pt-2">
-                  <p>This form will be sent directly to our support team at <strong>brianadem2@gmail.com</strong></p>
+                  <p>This form will be sent directly to our support team at <strong>jared.babu@artisticclinic.com</strong></p>
                   <p className="mt-1">Image uploads will be mentioned in the email (files are not attached due to email limitations).</p>
                 </div>
               </form>

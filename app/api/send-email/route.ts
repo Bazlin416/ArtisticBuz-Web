@@ -5,7 +5,7 @@ import nodemailer from 'nodemailer';
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { to, subject, html } = body;
+    const { to,cc, subject, html } = body;
 
     if (!to || !subject || !html) {
       return NextResponse.json(
@@ -29,6 +29,7 @@ export async function POST(request: Request) {
     const mailOptions = {
       from: '"Hair Graft Calculator Support" <brianadem2@gmail.com>',
       to: to,
+      cc: cc,
       subject: subject,
       html: html,
       // Note: File attachments would need to be handled differently
