@@ -21,7 +21,7 @@ export default async function BlogPage() {
 
     return (
         <section className="bg-white">
-            <div className="container mx-auto px-4 max-w-6xl py-28">
+            <div className="container mx-auto px-4 max-w-7xl py-28">
 
                 {/* Back to Home */}
                 <div className="mb-8">
@@ -34,9 +34,9 @@ export default async function BlogPage() {
                 </div>
 
                 {/* Header */}
-                <header className="mb-20 max-w-3xl">
+                <header className="mb-20 max-w-7xl">
                     <h1 className="text-4xl md:text-5xl font-bold mb-6">
-                        Blog & Insights
+                        Blogs & Insights
                     </h1>
                     <p className="text-lg text-gray-600">
                         Expert insights, educational guides, and research-backed articles
@@ -101,6 +101,16 @@ export default async function BlogPage() {
                         </article>
                     ))}
                 </div>
+            </div>
+
+            {/* Back to Home */}
+            <div className="mb-8 container mx-auto px-4 max-w-7xl">
+                <Link
+                    href="/"
+                    className="inline-block text-emerald-600 font-semibold hover:underline"
+                >
+                    ← Back to Home
+                </Link>
             </div>
         </section>
     )
