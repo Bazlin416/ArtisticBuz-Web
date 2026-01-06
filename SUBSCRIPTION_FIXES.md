@@ -1,7 +1,3 @@
-# Subscription System Fixes
-
-## Changes Made
-
 ### 1. Fixed Webhook to Use Service Role Key
 **Problem:** Webhook was using anon key which doesn't have permission to update subscriptions
 **Solution:** Changed webhook to use `SUPABASE_SERVICE_ROLE_KEY`
