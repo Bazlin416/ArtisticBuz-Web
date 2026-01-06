@@ -274,42 +274,109 @@ export default function Home() {
         <section className="py-24 bg-white border-b border-gray-100">
           <div className="container mx-auto px-4 max-w-7xl">
 
+            {/* Header */}
             <div className="text-center max-w-7xl mx-auto mb-16">
               <span className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-600 bg-emerald-50 px-4 py-1 rounded-full mb-4">
                 Our Services
               </span>
+
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
                 Comprehensive Hair Restoration Solutions
               </h2>
+
               <p className="text-gray-600 text-lg leading-relaxed">
-                ArtisticBuz offers a full range of medically guided hair restoration services - combining surgical precision, regenerative treatments, and aesthetic refinement to achieve natural, long-lasting results.
+                ArtisticBuz offers a full range of medically guided hair restoration
+                services – combining surgical precision, regenerative treatments,
+                and aesthetic refinement to achieve natural, long-lasting results.
               </p>
             </div>
 
+            {/* Services Grid */}
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
               {[
-                { title: "FUE Hair Transplant", desc: "Follicular Unit Extraction (FUE) is a minimally invasive technique where individual hair follicles are harvested and implanted for natural density with minimal scarring and faster recovery.", icon: Scissors, price: `${detectedAmount} 1,500+` },
-                { title: "FUT Hair Transplant", desc: "Follicular Unit Transplantation (FUT) is ideal for advanced hair loss cases, allowing a higher graft yield through strip harvesting while maintaining excellent cosmetic outcomes.", icon: Brush, price: `${detectedAmount} 2,000+` },
-                { title: "Beard Transplant", desc: "Designed for men with patchy or thin facial hair, beard transplants restore fullness and symmetry using precise angle-controlled implantation.", icon: UserCheck, price: `${detectedAmount} 800+` },
-                { title: "Eyebrow Transplant", desc: "A highly artistic procedure that restores eyebrow shape and density, customized to facial structure, gender, and natural growth direction.", icon: Sparkles, price: `${detectedAmount} 500+` },
-                { title: "PRP Treatment", desc: "Platelet-Rich Plasma (PRP) therapy stimulates dormant follicles, improves graft survival, and strengthens existing hair using your body’s natural growth factors.", icon: Syringe, price: `${detectedAmount} 350+` },
-                { title: "Scalp Micropigmentation (SMP)", desc: "A non-surgical cosmetic solution that creates the appearance of fuller hair or a clean shaved look by depositing medical-grade pigment into the scalp.", icon: Brush, price: `${detectedAmount} 400+` },
+                {
+                  title: "FUE Hair Transplant",
+                  desc: "Follicular Unit Extraction (FUE) is a minimally invasive technique where individual hair follicles are harvested and implanted for natural density with minimal scarring and faster recovery.",
+                  icon: Scissors,
+                  grafts: "1,500+",
+                },
+                {
+                  title: "FUT Hair Transplant",
+                  desc: "Follicular Unit Transplantation (FUT) is ideal for advanced hair loss cases, allowing a higher graft yield through strip harvesting while maintaining excellent cosmetic outcomes.",
+                  icon: Brush,
+                  grafts: "2,000+",
+                },
+                {
+                  title: "Beard Transplant",
+                  desc: "Designed for men with patchy or thin facial hair, beard transplants restore fullness and symmetry using precise angle-controlled implantation.",
+                  icon: UserCheck,
+                  grafts: "800+",
+                },
+                {
+                  title: "Eyebrow Transplant",
+                  desc: "A highly artistic procedure that restores eyebrow shape and density, customized to facial structure, gender, and natural growth direction.",
+                  icon: Sparkles,
+                  grafts: "500+",
+                },
+                {
+                  title: "PRP Treatment",
+                  desc: "Platelet-Rich Plasma (PRP) therapy stimulates dormant follicles, improves graft survival, and strengthens existing hair using your body’s natural growth factors.",
+                  icon: Syringe,
+                  grafts: "350+",
+                },
+                {
+                  title: "Scalp Micropigmentation (SMP)",
+                  desc: "A non-surgical cosmetic solution that creates the appearance of fuller hair or a clean shaved look by depositing medical-grade pigment into the scalp.",
+                  icon: Brush,
+                  grafts: "400+",
+                },
               ].map((service, i) => (
-                <div key={i} className="bg-gradient-to-tr from-emerald-100 via-teal-100 to-emerald-50 border-2 border-emerald-600 rounded-3xl p-8 hover:shadow-xl transition-shadow flex flex-col">
+                <div
+                  key={i}
+                  className="bg-gradient-to-tr from-emerald-100 via-teal-100 to-emerald-50
+                     border-2 border-emerald-600 rounded-3xl p-8
+                     hover:shadow-xl transition-shadow
+                     flex flex-col"
+                >
+                  {/* Icon */}
                   <div className="w-12 h-12 bg-emerald-200 rounded-xl flex items-center justify-center mb-5">
                     <service.icon className="w-6 h-6 text-emerald-700" />
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">{service.title}</h3>
-                  <p className="text-gray-600 text-sm leading-relaxed mb-3">{service.desc}</p>
-                  <p className="text-emerald-700 font-semibold text-lg">From {service.price}</p>
+
+                  {/* Content */}
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                    {service.title}
+                  </h3>
+
+                  <p className="text-gray-600 text-sm leading-relaxed mb-6">
+                    {service.desc}
+                  </p>
+
+                  {/* Price Block – FIXED */}
+                  <div className="mt-auto pt-4 border-t border-emerald-300/50">
+                    <div className="text-emerald-700 font-semibold text-lg">
+                      From {detectedAmount}
+                    </div>
+
+                    <div className="mt-1 text-sm text-gray-600">
+                      Estimated {service.grafts} grafts
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
 
+            {/* CTA */}
             <div className="text-center mt-16">
               <button
-                onClick={() => { const calculatorSection = document.getElementById("calculator"); if (calculatorSection) calculatorSection.scrollIntoView({ behavior: "smooth" }); }}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-8 py-4 rounded-xl shadow-lg transition-all"
+                onClick={() => {
+                  const calculatorSection = document.getElementById("calculator");
+                  if (calculatorSection) {
+                    calculatorSection.scrollIntoView({ behavior: "smooth" });
+                  }
+                }}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold
+                   px-8 py-4 rounded-xl shadow-lg transition-all"
               >
                 Calculate Your Graft Requirement
               </button>
@@ -317,6 +384,7 @@ export default function Home() {
 
           </div>
         </section>
+
 
         {/* Step 1 – Area-Based Estimation */}
         <section className="py-24 bg-gradient-to-b from-white to-gray-50">
@@ -352,9 +420,16 @@ export default function Home() {
                   </p>
                 </div>
 
-                <div className="flex-1 rounded-2xl overflow-hidden bg-gray-50">
+                <div
+                  className="
+                    relative rounded-2xl bg-gray-50
+                    aspect-[4/5] sm:aspect-[1/1] md:aspect-[5/6]
+                    min-h-[420px] sm:min-h-[480px] lg:min-h-[520px]
+                  "
+                >
                   <HairSpline onAreaSelect={(area) => setSelectedArea(area)} />
                 </div>
+
               </div>
 
               {/* Calculator Card */}

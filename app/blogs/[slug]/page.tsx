@@ -289,6 +289,14 @@ export default async function BlogPostPage({
                         </div>
                     </div>
                 )}
+
+                {/* Back */}
+                <Link
+                    href="/blogs"
+                    className="inline-block mb-8 text-emerald-600 font-semibold hover:underline"
+                >
+                    ← Back to Blogs
+                </Link>
             </div>
         </article>
     )

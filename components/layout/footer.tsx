@@ -72,6 +72,15 @@ export function Footer() {
             </h3>
 
             <ul className="space-y-4 text-sm">
+              {/* Location */}
+              <li className="flex items-center gap-3">
+                <MapPin className="w-5 h-5 text-emerald-500 shrink-0" />
+                <span className="text-gray-400">
+                  Edmonton, Alberta, Canada
+                </span>
+              </li>
+
+              {/* Email */}
               <li className="flex items-center gap-3">
                 <Mail className="w-5 h-5 text-emerald-500 shrink-0" />
                 <span className="text-gray-400">
@@ -80,6 +89,7 @@ export function Footer() {
               </li>
             </ul>
           </div>
+
         </div>
 
         {/* Bottom Bar */}
