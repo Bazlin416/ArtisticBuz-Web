@@ -11,7 +11,7 @@ This application features a professional hair transplant calculator with user au
 - User profile management with gender preferences
 
 ### 2. Subscription System
-- One-time payment of $1 for lifetime access
+- One-time payment of $1 for 14 days access
 - Stripe payment integration
 - Automatic subscription status tracking
 - Premium user badges

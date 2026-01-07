@@ -22,7 +22,7 @@ This is a professional hair transplant calculator web application that estimates
 ### Core Features
 1. **Hair Graft Calculator** - Estimates grafts needed for hair restoration
 2. **User Authentication** - Sign up / Login via Supabase
-3. **Subscription System** - One-time $1 payment for lifetime access
+3. **Subscription System** - One-time $1 payment for 14 days access
 4. **Consultation Form** - Users can submit consultation requests
 5. **Gender-Inclusive UI** - Three visualization options (Neutral/Male/Female)
 
@@ -534,7 +534,7 @@ export function createServiceRoleClient() {
 7. **Click subscribe** → `SubscriptionModal` opens
 8. **Click "Subscribe Now"** → Redirected to Stripe checkout
 9. **Enter payment details** → Complete Stripe payment (test: 4242 4242 4242 4242)
-10. **Success page** → Lifetime access granted
+10. **Success page** → 14 days access granted
 11. **Use calculator** → View results, submit consultation
 
 ### Returning User Flow
