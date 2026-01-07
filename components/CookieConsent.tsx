@@ -28,12 +28,12 @@ export function CookieConsent() {
         <div className="fixed bottom-4 left-4 right-4 md:left-auto md:right-6 md:bottom-6 z-50 max-w-xl">
             <div
                 className="
-          bg-gradient-to-br from-emerald-50 via-white to-teal-50
-          border border-emerald-200
-          rounded-2xl shadow-2xl
-          p-5 md:p-6
-          animate-in slide-in-from-bottom-4 fade-in duration-300
-        "
+                  bg-gradient-to-br from-emerald-50 via-white to-teal-50
+                  border border-emerald-200
+                  rounded-2xl shadow-2xl
+                  p-5 md:p-6
+                  animate-in slide-in-from-bottom-4 fade-in duration-300
+                "
             >
                 <div className="flex items-start gap-4">
                     {/* Icon */}
@@ -64,12 +64,12 @@ export function CookieConsent() {
                             <button
                                 onClick={handleDecline}
                                 className="
-                  px-4 py-2 rounded-xl
-                  border border-gray-300
-                  text-sm font-medium text-gray-700
-                  hover:bg-gray-100
-                  transition
-                "
+                                   px-4 py-2 rounded-xl
+                                   border border-gray-300
+                                   text-sm font-medium text-gray-700
+                                   hover:bg-gray-100
+                                   transition
+                               "
                             >
                                 Decline
                             </button>
@@ -77,13 +77,13 @@ export function CookieConsent() {
                             <button
                                 onClick={handleAccept}
                                 className="
-                  px-5 py-2 rounded-xl
-                  bg-emerald-600 text-white
-                  text-sm font-semibold
-                  hover:bg-emerald-700
-                  shadow-md hover:shadow-lg
-                  transition
-                "
+                                  px-5 py-2 rounded-xl
+                                  bg-emerald-600 text-white
+                                  text-sm font-semibold
+                                  hover:bg-emerald-700
+                                  shadow-md hover:shadow-lg
+                                  transition
+                                "
                             >
                                 Accept cookies
                             </button>

@@ -3,6 +3,33 @@ import { urlFor } from '@/lib/sanityImage'
 import Link from 'next/link'
 import Image from 'next/image'
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+    title: "Hair Loss & Hair Restoration Blog",
+    description:
+        "Expert articles on hair loss, hair restoration, and graft planning backed by clinical insights.",
+    alternates: {
+        canonical: "https://artisticbuz.com/blogs",
+    },
+    openGraph: {
+        title: "Hair Loss & Hair Restoration Blog",
+        description:
+            "Expert articles on hair loss, hair restoration, and graft planning backed by clinical insights.",
+        url: "https://artisticbuz.com/blogs",
+        siteName: "ArtisticBuz",
+        type: "website",
+    },
+    twitter: {
+        card: "summary_large_image",
+        title: "Hair Loss & Hair Restoration Blog",
+        description:
+            "Expert articles on hair loss, hair restoration, and graft planning backed by clinical insights.",
+    },
+};
+
+
+
 const BLOG_QUERY = `
 *[_type == "blog" && discoverEligible == true]
 | order(publishedAt desc) {

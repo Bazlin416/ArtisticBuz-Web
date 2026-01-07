@@ -80,7 +80,14 @@ export async function generateMetadata({
                 ]
                 : [],
         },
+        twitter: {
+            card: "summary_large_image",
+            title,
+            description,
+            images: blog.mainImage ? [urlFor(blog.mainImage).width(1200).url()] : [],
+        }
     }
+
 }
 
 /* =========================
@@ -206,100 +213,129 @@ export default async function BlogPostPage({
     const isFeatured = blog.discoverPriority === 'high'
 
     return (
-        <article className="bg-white">
-            <div className="container mx-auto px-4 max-w-3xl py-28">
+        <>
+            <article className="bg-white">
+                <div className="container mx-auto px-4 max-w-3xl py-28">
 
-                {/* Back */}
-                <Link
-                    href="/blogs"
-                    className="inline-block mb-8 text-emerald-600 font-semibold hover:underline"
-                >
-                    ← Back to Blogs
-                </Link>
+                    {/* Back */}
+                    <Link
+                        href="/blogs"
+                        className="inline-block mb-8 text-emerald-600 font-semibold hover:underline"
+                    >
+                        ← Back to Blogs
+                    </Link>
 
-                {/* Topic */}
-                <p className="text-sm uppercase tracking-wide text-emerald-600 font-semibold mb-4">
-                    {blog.topic}
-                </p>
+                    {/* Topic */}
+                    <p className="text-sm uppercase tracking-wide text-emerald-600 font-semibold mb-4">
+                        {blog.topic}
+                    </p>
 
-                {/* Title */}
-                <h1 className="text-4xl md:text-5xl font-bold leading-tight mb-6">
-                    {blog.seoTitle || blog.title}
-                </h1>
+                    {/* Title */}
+                    <h1 className="text-4xl md:text-5xl font-bold leading-tight mb-6">
+                        {blog.seoTitle || blog.title}
+                    </h1>
 
-                {/* Featured */}
-                {isFeatured && (
-                    <span className="inline-block mb-6 px-3 py-1 text-xs font-semibold rounded-full bg-emerald-100 text-emerald-700">
-                        Featured Article
-                    </span>
-                )}
-
-                {/* Meta */}
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-gray-500 mb-12">
-                    <span>By {blog.author}</span>
-                    <span>•</span>
-                    <time>{new Date(blog.publishedAt).toLocaleDateString()}</time>
-
-                    {blog.updatedAt && (
-                        <>
-                            <span>•</span>
-                            <time>
-                                Updated {new Date(blog.updatedAt).toLocaleDateString()}
-                            </time>
-                        </>
+                    {/* Featured */}
+                    {isFeatured && (
+                        <span className="inline-block mb-6 px-3 py-1 text-xs font-semibold rounded-full bg-emerald-100 text-emerald-700">
+                            Featured Article
+                        </span>
                     )}
 
-                    <span>•</span>
-                    <span className="capitalize">{blog.contentType}</span>
-                </div>
+                    {/* Meta */}
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-gray-500 mb-12">
+                        <span>By {blog.author}</span>
+                        <span>•</span>
+                        <time>{new Date(blog.publishedAt).toLocaleDateString()}</time>
 
-                {/* Hero Image */}
-                <Image
-                    src={urlFor(blog.mainImage)
-                        .width(1200)
-                        .height(630)
-                        .url()}
-                    alt={blog.title}
-                    width={1200}
-                    height={630}
-                    className="rounded-3xl mb-16"
-                    priority={isFeatured}
-                />
+                        {blog.updatedAt && (
+                            <>
+                                <span>•</span>
+                                <time>
+                                    Updated {new Date(blog.updatedAt).toLocaleDateString()}
+                                </time>
+                            </>
+                        )}
 
-                {/* Content */}
-                <div className="prose prose-emerald prose-lg max-w-none">
-                    <PortableText
-                        value={blog.body}
-                        components={portableTextComponents}
-                    />
-                </div>
-
-                {/* Tags */}
-                {blog.tags?.length > 0 && (
-                    <div className="mt-16 pt-10 border-t">
-                        <div className="flex flex-wrap gap-2">
-                            {blog.tags.map((tag: string) => (
-                                <span
-                                    key={tag}
-                                    className="text-xs font-medium px-3 py-1 rounded-full bg-gray-100 text-gray-700"
-                                >
-                                    #{tag}
-                                </span>
-                            ))}
-                        </div>
+                        <span>•</span>
+                        <span className="capitalize">{blog.contentType}</span>
                     </div>
-                )}
 
-                {/* Back */}
-                <Link
-                    href="/blogs"
-                    className="inline-block mb-8 text-emerald-600 font-semibold hover:underline"
-                >
-                    ← Back to Blogs
-                </Link>
-            </div>
-        </article>
+                    {/* Hero Image */}
+                    <Image
+                        src={urlFor(blog.mainImage)
+                            .width(1200)
+                            .height(630)
+                            .url()}
+                        alt={blog.title}
+                        width={1200}
+                        height={630}
+                        className="rounded-3xl mb-16"
+                        priority={isFeatured}
+                    />
+
+                    {/* Content */}
+                    <div className="prose prose-emerald prose-lg max-w-none">
+                        <PortableText
+                            value={blog.body}
+                            components={portableTextComponents}
+                        />
+                    </div>
+
+                    {/* Tags */}
+                    {blog.tags?.length > 0 && (
+                        <div className="mt-16 pt-10 border-t">
+                            <div className="flex flex-wrap gap-2">
+                                {blog.tags.map((tag: string) => (
+                                    <span
+                                        key={tag}
+                                        className="text-xs font-medium px-3 py-1 rounded-full bg-gray-100 text-gray-700"
+                                    >
+                                        #{tag}
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Back */}
+                    <Link
+                        href="/blogs"
+                        className="inline-block mb-8 text-emerald-600 font-semibold hover:underline"
+                    >
+                        ← Back to Blogs
+                    </Link>
+                </div>
+            </article>
+
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{
+                    __html: JSON.stringify({
+                        "@context": "https://schema.org",
+                        "@type": "BlogPosting",
+                        headline: blog.seoTitle || blog.title,
+                        image: blog.mainImage
+                            ? [urlFor(blog.mainImage).width(1200).url()]
+                            : undefined,
+                        author: {
+                            "@type": "Person",
+                            name: blog.author,
+                        },
+                        datePublished: blog.publishedAt,
+                        dateModified: blog.updatedAt || blog.publishedAt,
+                        description: blog.seoDescription || blog.excerpt || "",
+                        mainEntityOfPage: {
+                            "@type": "WebPage",
+                            "@id": `/blogs/${resolvedParams.slug}`,
+                        },
+                    }),
+                }}
+            />
+        </>
+
     )
+
 }
 
 
