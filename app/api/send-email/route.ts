@@ -16,18 +16,18 @@ export async function POST(request: Request) {
 
     // Create a transporter using Gmail SMTP
     const transporter = nodemailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 587,
+      host: 'mail.artisticbuz.com',
+      port: 465,
       secure: false,
       auth: {
-        user: 'brianadem2@gmail.com',
-        pass: 'wpsqhnilcicxrhql',
+        user: 'support@artisticbuz.com',
+        pass: 'ArtB@#2025',
       },
     });
 
     // Configure email options
     const mailOptions = {
-      from: '"Hair Graft Calculator Support" <brianadem2@gmail.com>',
+      from: '"Hair Graft Calculator Support" <support@artisticbuz.com>',
       to: to,
       cc: cc,
       subject: subject,

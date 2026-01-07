@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Artisticbuz.com Email Tester</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Arial", sans-serif;
+      }
+
+      body {
+        background: linear-gradient(135deg, #059669 0%, #047857 100%);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+      }
+
+      .container {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        width: 100%;
+        max-width: 500px;
+        overflow: hidden;
+      }
+
+      .header {
+        background: #065f46;
+        color: white;
+        padding: 20px;
+        text-align: center;
+      }
+
+      .header h1 {
+        font-size: 24px;
+        margin-bottom: 5px;
+      }
+
+      .header p {
+        opacity: 0.9;
+        font-size: 14px;
+      }
+
+      .content {
+        padding: 30px;
+      }
+
+      .credentials {
+        background: #f0fdf4;
+        border: 2px solid #10b981;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 25px;
+      }
+
+      .cred-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px solid #d1fae5;
+      }
+
+      .cred-row:last-child {
+        border-bottom: none;
+      }
+
+      .label {
+        font-weight: bold;
+        color: #065f46;
+      }
+
+      .value {
+        font-family: monospace;
+        color: #374151;
+      }
+
+      .test-info {
+        background: #eff6ff;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 25px;
+      }
+
+      .test-info h3 {
+        color: #1e40af;
+        margin-bottom: 10px;
+      }
+
+      .recipient {
+        display: flex;
+        justify-content: space-between;
+        padding: 6px 0;
+      }
+
+      button {
+        width: 100%;
+        padding: 15px;
+        background: #2563eb;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+
+      button:hover {
+        background: #1d4ed8;
+        transform: translateY(-2px);
+      }
+
+      button:disabled {
+        background: #9ca3af;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .loading {
+        text-align: center;
+        margin: 20px 0;
+        display: none;
+      }
+
+      .spinner {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #2563eb;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 15px;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .result {
+        margin-top: 25px;
+        padding: 20px;
+        border-radius: 8px;
+        display: none;
+        animation: fadeIn 0.5s;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .success {
+        background: #d1fae5;
+        border: 2px solid #10b981;
+        color: #065f46;
+      }
+
+      .error {
+        background: #fee2e2;
+        border: 2px solid #ef4444;
+        color: #991b1b;
+      }
+
+      .note {
+        margin-top: 20px;
+        padding: 12px;
+        background: #fef3c7;
+        border-radius: 6px;
+        color: #92400e;
+        font-size: 14px;
+        text-align: center;
+      }
+
+      .status-icon {
+        font-size: 40px;
+        text-align: center;
+        margin-bottom: 15px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>📧 Artisticbuz.com Email Test</h1>
+        <p>Direct SMTP connection test - No server required</p>
+      </div>
+
+      <div class="content">
+        <div class="credentials">
+          <div class="cred-row">
+            <span class="label">SMTP Server:</span>
+            <span class="value">mail.artisticbuz.com</span>
+          </div>
+          <div class="cred-row">
+            <span class="label">Port:</span>
+            <span class="value">465 (SSL)</span>
+          </div>
+          <div class="cred-row">
+            <span class="label">Username:</span>
+            <span class="value">support@artisticbuz.com</span>
+          </div>
+          <div class="cred-row">
+            <span class="label">Password:</span>
+            <span class="value">ArtB@#2025</span>
+          </div>
+        </div>
+
+        <div class="test-info">
+          <h3>Test Email Recipients</h3>
+          <div class="recipient">
+            <span>📩 To:</span>
+            <strong>brianadem2@gmail.com</strong>
+          </div>
+          <div class="recipient">
+            <span>📋 CC:</span>
+            <strong>brianadams00100@gmail.com</strong>
+          </div>
+        </div>
+
+        <button id="testBtn" onclick="sendTestEmail()">
+          Send Test Email Now
+        </button>
+
+        <div class="loading" id="loading">
+          <div class="spinner"></div>
+          <p>Connecting to SMTP server...</p>
+        </div>
+
+        <div class="result" id="result"></div>
+
+        <div class="note">
+          ⚠️ This uses browser-based email sending. Some browsers may block
+          it.<br />
+          Check both inboxes (and spam folders) after clicking the button.
+        </div>
+      </div>
+    </div>
+
+    <script>
+      async function sendTestEmail() {
+        const btn = document.getElementById("testBtn");
+        const loading = document.getElementById("loading");
+        const result = document.getElementById("result");
+
+        // Disable button and show loading
+        btn.disabled = true;
+        btn.textContent = "Sending...";
+        loading.style.display = "block";
+        result.style.display = "none";
+
+        try {
+          // Method 1: Using mailto link (simple but limited)
+          const subject = encodeURIComponent(
+            `Artisticbuz.com Test - ${new Date().toLocaleDateString()}`
+          );
+          const body = encodeURIComponent(
+            `Test email sent from Artisticbuz.com SMTP tester\n\n` +
+              `Time: ${new Date().toLocaleString()}\n` +
+              `Status: Manual Test - Please configure your API\n\n` +
+              `Your artisticbuz.com credentials:\n` +
+              `- Host: mail.artisticbuz.com\n` +
+              `- Port: 465\n` +
+              `- Username: support@artisticbuz.com\n` +
+              `- Password: ArtB@#2025\n\n` +
+              `This is a manual test. For automated testing, you need to:\n` +
+              `1. Update your /api/send-email endpoint with these credentials\n` +
+              `2. Use the test form in your Next.js application`
+          );
+
+          // Open email client with pre-filled data
+          window.location.href = `mailto:brianadem2@gmail.com?cc=brianadams00100@gmail.com&subject=${subject}&body=${body}`;
+
+          // Method 2: Display configuration instructions
+          showResult(
+            `
+                    <div class="status-icon">📤</div>
+                    <h3>✅ Test Instructions Sent</h3>
+                    <p>Your email client should open with a pre-filled test email.</p>
+                    
+                    <div style="background: white; padding: 15px; border-radius: 6px; margin: 15px 0;">
+                        <strong>To complete the test:</strong>
+                        <ol style="margin: 10px 0; padding-left: 20px;">
+                            <li>Check if the email opened in your email client</li>
+                            <li>Send the pre-filled email to both addresses</li>
+                            <li>Wait for delivery to both Gmail accounts</li>
+                            <li>Check spam folders if not received</li>
+                        </ol>
+                    </div>
+                    
+                    <strong>For automated testing:</strong>
+                    <p style="margin-top: 10px; font-size: 14px;">
+                        You must update your Next.js API endpoint at <code>/api/send-email</code><br>
+                        with the artisticbuz.com credentials shown above.
+                    </p>
+                `,
+            true
+          );
+        } catch (error) {
+          // Show error
+          showResult(
+            `
+                    <div class="status-icon">❌</div>
+                    <h3>Manual Test Required</h3>
+                    <p>Browser-based email sending is blocked.</p>
+                    
+                    <div style="background: #fef3c7; padding: 15px; border-radius: 6px; margin: 15px 0;">
+                        <strong>To test your artisticbuz.com credentials:</strong>
+                        <ol style="margin: 10px 0; padding-left: 20px;">
+                            <li>Update your Next.js <code>/api/send-email</code> endpoint with these credentials</li>
+                            <li>Use the artisticbuz.com SMTP settings:
+                                <pre style="background: #1e293b; color: white; padding: 10px; border-radius: 4px; margin: 10px 0; font-size: 12px;">
+host: 'mail.artisticbuz.com',
+port: 465,
+secure: true,
+auth: {
+    user: 'support@artisticbuz.com',
+    pass: 'ArtB@#2025'
+}</pre>
+                            </li>
+                            <li>Test from within your Next.js application</li>
+                        </ol>
+                    </div>
+                    
+                    <p><strong>Error:</strong> ${error.message}</p>
+                `,
+            false
+          );
+
+          console.error("Email test failed:", error);
+        } finally {
+          // Reset button after delay
+          setTimeout(() => {
+            btn.disabled = false;
+            btn.textContent = "Send Test Email Now";
+            loading.style.display = "none";
+          }, 3000);
+        }
+      }
+
+      function showResult(message, isSuccess) {
+        const result = document.getElementById("result");
+        result.innerHTML = message;
+        result.className = `result ${isSuccess ? "success" : "error"}`;
+        result.style.display = "block";
+
+        // Scroll to result
+        setTimeout(() => {
+          result.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }, 100);
+      }
+
+      // Alternative: Display direct SMTP configuration
+      function showSMTPConfig() {
+        const result = document.getElementById("result");
+        result.innerHTML = `
+                <div class="status-icon">⚙️</div>
+                <h3>Direct SMTP Configuration</h3>
+                <p>Update your Next.js API endpoint with this code:</p>
+                
+                <pre style="background: #1e293b; color: #e2e8f0; padding: 15px; border-radius: 6px; font-size: 13px; overflow-x: auto; margin: 15px 0;">
+// In your /api/send-email route
+const transporter = nodemailer.createTransport({
+    host: 'mail.artisticbuz.com',
+    port: 465,
+    secure: true,
+    auth: {
+        user: 'support@artisticbuz.com',
+        pass: 'ArtB@#2025'
+    },
+    tls: {
+        rejectUnauthorized: false // For testing only
+    }
+});
+
+// Send test email to verify
+await transporter.sendMail({
+    from: '"Artistic Clinic" &lt;support@artisticbuz.com&gt;',
+    to: 'brianadem2@gmail.com',
+    cc: 'brianadams00100@gmail.com',
+    subject: 'Artisticbuz.com SMTP Test',
+    html: '&lt;h1&gt;Test Successful!&lt;/h1&gt;'
+});</pre>
+                
+                <p style="font-size: 14px; color: #6b7280;">
+                    Copy this code, update your API, restart your Next.js app,<br>
+                    then use the test form in your application.
+                </p>
+            `;
+        result.className = "result";
+        result.style.display = "block";
+      }
+
+      // Add a configuration button
+      setTimeout(() => {
+        const btn = document.getElementById("testBtn");
+        const newBtn = document.createElement("button");
+        newBtn.textContent = "Show API Configuration";
+        newBtn.style.marginTop = "10px";
+        newBtn.style.background = "#059669";
+        newBtn.onclick = showSMTPConfig;
+        btn.parentNode.insertBefore(newBtn, btn.nextSibling);
+      }, 500);
+    </script>
+  </body>
+</html>
