@@ -505,7 +505,7 @@ export default function Home() {
                     Unlock Full Calculator Access
                   </h3>
                   <p className="text-gray-600 mb-6">
-                    Get lifetime access to detailed graft estimates for just{" "}
+                    Get 14-day full access to personalized graft estimates and cost breakdowns for just{" "}
                     <strong>{detectedAmount}</strong>.
                   </p>
                   <Button

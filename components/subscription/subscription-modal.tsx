@@ -211,6 +211,12 @@ export function SubscriptionModal({ isOpen, onClose }: SubscriptionModalProps) {
               <div className="flex items-start gap-3">
                 <CheckCircle className="w-5 h-5 text-emerald-600 mt-0.5 flex-shrink-0" />
                 <p className="text-sm text-gray-700">
+                  Transparent cost estimates based on graft count and selected areas
+                </p>
+              </div>
+              <div className="flex items-start gap-3">
+                <CheckCircle className="w-5 h-5 text-emerald-600 mt-0.5 flex-shrink-0" />
+                <p className="text-sm text-gray-700">
                   Gender-inclusive visualization options
                 </p>
               </div>
