@@ -18,7 +18,7 @@ export async function POST(request: Request) {
     const transporter = nodemailer.createTransport({
       host: 'mail.artisticbuz.com',
       port: 465,
-      secure: false,
+      secure: true,
       auth: {
         user: 'support@artisticbuz.com',
         pass: 'ArtB@#2025',
