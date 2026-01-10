@@ -336,12 +336,19 @@ export function ConsultationFormModal({
     form.setValue("medications", updatedMedications);
   };
 
-  const sendEmail = async (formData: FormData) => {
+  const sendEmail = async (formData: any) => {
     try {
       const response = await fetch("/api/send-email", {
         method: "POST",
-        // DO NOT set Content-Type header - browser will set it with boundary
-        body: formData,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          to: "jared.babu@artisticclinic.com",
+          cc: "support@artisticbuz.com",
+          subject: `New Hair Consultation Request - ${formData.clientsName.first} ${formData.clientsName.last}`,
+          html: generateEmailHTML(formData),
+        }),
       });
 
       const result = await response.json();
@@ -461,7 +468,7 @@ export function ConsultationFormModal({
               <div class="section-title">Hair Style Image</div>
               <div class="image-info">
                 <p><strong>File Uploaded:</strong> ${formData.hairStyleImage.name}</p>
-                <p><em>Note: Image is attached to this email as a file.</em></p>
+                <p><em>Note: Actual image files are attached separately in this email.</em></p>
               </div>
             </div>`
                 : ""
@@ -473,7 +480,7 @@ export function ConsultationFormModal({
               <div class="section-title">Current Hair Image</div>
               <div class="image-info">
                 <p><strong>File Uploaded:</strong> ${formData.currentHairImage.name}</p>
-                <p><em>Note: Image is attached to this email as a file.</em></p>
+                <p><em>Note: Actual image files are attached separately in this email.</em></p>
               </div>
             </div>`
                 : ""
@@ -670,7 +677,7 @@ export function ConsultationFormModal({
             
             <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; color: #6b7280; font-size: 14px;">
               <p>This email was automatically generated from the Hair Graft Calculator website.</p>
-              <p>Check email attachments for uploaded images.</p>
+              <p>Please check email attachments for any uploaded images.</p>
             </div>
           </div>
         </div>
@@ -684,62 +691,47 @@ export function ConsultationFormModal({
     setEmailError(null);
 
     try {
-      // Create FormData object to properly handle file uploads
+      // Create FormData to handle file uploads
       const formData = new FormData();
 
-      // Set email recipients and subject
-      formData.append("to", "brianadem2@gmail.com");
-      formData.append("cc", "brianadams00100@gmail.com");
-      formData.append(
-        "subject",
-        `New Hair Consultation Request - ${values.clientsName.first} ${values.clientsName.last}`
-      );
-
-      // Append calculation summary
-      formData.append("selectedType", selectedType);
-      formData.append("estimatedGrafts", estimatedGrafts);
-      if (estimatedPrice) {
-        formData.append("estimatedPrice", estimatedPrice);
-      }
-
-      // Generate HTML content
-      const htmlContent = generateEmailHTML({
-        ...values,
-        selectedType,
-        estimatedGrafts,
-        estimatedPrice,
+      // Append all form data
+      Object.keys(values).forEach((key) => {
+        if (key === "hairStyleImage" || key === "currentHairImage") {
+          // Files will be handled separately
+          return;
+        }
+        if (typeof values[key as keyof typeof values] === "object") {
+          formData.append(
+            key,
+            JSON.stringify(values[key as keyof typeof values])
+          );
+        } else {
+          formData.append(key, values[key as keyof typeof values] as string);
+        }
       });
 
-      // Append HTML content
-      formData.append("html", htmlContent);
-
-      // Append the complete form data as JSON for the database
-      const completeFormData = {
-        ...values,
-        selectedType,
-        estimatedGrafts,
-        estimatedPrice,
-      };
-      formData.append("formData", JSON.stringify(completeFormData));
-
-      // Append image files if they exist
-      if (values.hairStyleImage && values.hairStyleImage instanceof File) {
+      // Append files
+      if (values.hairStyleImage) {
         formData.append("hairStyleImage", values.hairStyleImage);
       }
-
-      if (values.currentHairImage && values.currentHairImage instanceof File) {
+      if (values.currentHairImage) {
         formData.append("currentHairImage", values.currentHairImage);
       }
 
-      // Send email with attachments
-      await sendEmail(formData);
+      // Send the email
+      await sendEmail(values);
 
-      // Optional: Save to database
+      // Also save to database (optional)
       try {
         await fetch("/api/consultation", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(completeFormData),
+          body: JSON.stringify({
+            ...values,
+            selectedBaldnessType: selectedType,
+            estimatedGrafts: estimatedGrafts,
+            estimatedPrice: estimatedPrice,
+          }),
         });
       } catch (dbError) {
         console.log(
@@ -786,10 +778,7 @@ export function ConsultationFormModal({
             </p>
             <div className="inline-flex items-center gap-2 text-sm text-emerald-600 bg-emerald-50 px-4 py-2 rounded-lg">
               <Mail className="w-4 h-4" />
-              <span>
-                A confirmation with attachments has been sent to our support
-                team.
-              </span>
+              <span>A confirmation has been sent to our support team.</span>
             </div>
           </div>
         ) : (
@@ -1780,8 +1769,8 @@ export function ConsultationFormModal({
                     <strong>jared.babu@artisticclinic.com</strong>
                   </p>
                   <p className="mt-1">
-                    <strong>Note:</strong> Uploaded images will be sent as email
-                    attachments.
+                    Image uploads will be mentioned in the email (files are not
+                    attached due to email limitations).
                   </p>
                 </div>
               </form>
