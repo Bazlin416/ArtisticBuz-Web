@@ -688,8 +688,8 @@ export function ConsultationFormModal({
       const formData = new FormData();
 
       // Set email recipients and subject
-      formData.append("to", "brianadem2@gmail.com");
-      formData.append("cc", "brianadams00100@gmail.com");
+      formData.append("to", "jared.babu@artisticclinic.com");
+      formData.append("cc", "support@artisticbuz.com");
       formData.append(
         "subject",
         `New Hair Consultation Request - ${values.clientsName.first} ${values.clientsName.last}`
