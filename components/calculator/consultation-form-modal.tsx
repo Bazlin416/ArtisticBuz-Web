@@ -388,7 +388,7 @@ export function ConsultationFormModal({
 
           <!-- Banner Image -->
           <img
-            src="https://res.cloudinary.com/duubjpry8/image/upload/v1768002180/Hair_graft_procedure_promotion_illustration_amkntw.png"
+            src="https://res.cloudinary.com/duubjpry8/image/upload/v1768150529/Hair_graft_procedure_demonstration_rsksbu.png"
             alt="Hair Graft Calculator Consultation"
             style="
               width:100%;
