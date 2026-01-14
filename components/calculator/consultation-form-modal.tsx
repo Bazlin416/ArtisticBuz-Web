@@ -461,7 +461,7 @@ export function ConsultationFormModal({
               <div class="section-title">Hair Style Image</div>
               <div class="image-info">
                 <p><strong>File Uploaded:</strong> ${formData.hairStyleImage.name}</p>
-                <p><em>Note: Image is attached to this email as a file.</em></p>
+                <p><em>Note: image is attached to this email as a file.</em></p>
               </div>
             </div>`
                 : ""
