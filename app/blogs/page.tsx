@@ -5,6 +5,8 @@ import Image from 'next/image'
 
 import type { Metadata } from "next";
 
+export const revalidate = 60
+
 export const metadata: Metadata = {
     title: "Hair Loss & Hair Restoration Blog",
     description:
