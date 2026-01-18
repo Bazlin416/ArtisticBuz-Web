@@ -123,6 +123,7 @@ Expected Flow:
 Expected Result: Can use calculator
 ```
 
+
 ### Scenario 2: Subscribe to Access
 ```
 Expected Flow:
@@ -139,6 +140,7 @@ Expected Flow:
 Expected Result: 200 OK, Stripe session URL returned
 No 401 error ✓
 ```
+
 
 ### Scenario 3: Stripe Webhook
 ```
