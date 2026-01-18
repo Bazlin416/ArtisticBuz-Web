@@ -3,7 +3,8 @@
 
 import { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session, AuthError } from '@supabase/supabase-js';
-import { createClient } from '@/lib/supabase'; // Import from your updated lib
+import { createClient } from '@/lib/supabase';
+import { checkAndUpdateSubscriptionExpiration } from '@/lib/subscription-utils';
 
 interface AuthContextType {
   user: User | null;
@@ -14,7 +15,6 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   isSubscribed: boolean;
   checkSubscription: () => Promise<void>;
-  supabase: any; // Add this to share the client
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -24,7 +24,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSubscribed, setIsSubscribed] = useState(false);
-  const supabase = createClient(); // Create client once
+  const supabase = createClient();
 
   const checkSubscription = async () => {
     if (!user) {
@@ -32,21 +32,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    const { data, error } = await supabase
-      .from('subscriptions')
-      .select('status')
-      .eq('user_id', user.id)
-      .maybeSingle();
-
-    if (error || !data) {
+    try {
+      const isActive = await checkAndUpdateSubscriptionExpiration(user.id);
+      setIsSubscribed(isActive);
+    } catch (error) {
+      console.error('Error checking subscription:', error);
       setIsSubscribed(false);
-      return;
     }
-
-    setIsSubscribed(data.status === 'active' || data.status === 'trialing');
   };
-
-  console.log('AuthProvider render:', {isSubscribed });
 
   useEffect(() => {
     // Get initial session
@@ -112,7 +105,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signOut,
     isSubscribed,
     checkSubscription,
-    supabase, // Provide the supabase client
   };
 
   return (

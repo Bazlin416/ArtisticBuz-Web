@@ -128,7 +128,7 @@ Expected Result: Can use calculator
 Expected Flow:
 1. Logged in user clicks "Select Hair Type" ✓
 2. Subscription modal opens ✓
-3. Click "Subscribe Now - $1" ✓
+3. Click "Subscribe Now - $5" ✓
 4. fetch() includes credentials: 'include' ✓
 5. Server receives request with auth cookies ✓
 6. Server calls createServerSupabaseClient() ✓

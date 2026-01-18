@@ -25,12 +25,12 @@
 - Uses ipapi.co to detect user's country
 - Automatically selects appropriate currency:
   - Kenya (KE): KSH 130
-  - USA (US): $1.00
+  - USA (US): $5.00
   - UK (GB): £0.80
   - Nigeria (NG): ₦1,600
   - South Africa (ZA): R19
   - EU countries: €0.95
-  - Default: $1.00
+  - Default: $5.00
 - Displays detected currency and amount in modal
 
 **File:** `app/api/create-checkout-session/route.ts`
@@ -120,7 +120,7 @@ Subscriptions table structure:
 
 | Country | Currency | Amount | Display |
 |---------|----------|--------|---------|
-| US | USD | 100 | $1.00 |
+| US | USD | 100 | $5.00 |
 | KE | KES | 130 | KSH 130 |
 | GB | GBP | 80 | £0.80 |
 | NG | NGN | 1600 | ₦1,600 |

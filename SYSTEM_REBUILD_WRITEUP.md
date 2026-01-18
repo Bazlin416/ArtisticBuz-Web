@@ -22,7 +22,7 @@ This is a professional hair transplant calculator web application that estimates
 ### Core Features
 1. **Hair Graft Calculator** - Estimates grafts needed for hair restoration
 2. **User Authentication** - Sign up / Login via Supabase
-3. **Subscription System** - One-time $1 payment for 14 days access
+3. **Subscription System** - One-time $5 payment for 14 days access
 4. **Consultation Form** - Users can submit consultation requests
 5. **Gender-Inclusive UI** - Three visualization options (Neutral/Male/Female)
 
@@ -88,7 +88,7 @@ id (uuid) - PRIMARY KEY, DEFAULT gen_random_uuid()
 user_id (uuid) - REFERENCES auth.users(id) ON DELETE CASCADE
 subscription_id (uuid) - REFERENCES subscriptions(id) ON DELETE SET NULL
 stripe_payment_intent_id (text) - UNIQUE Stripe payment intent ID
-amount (integer) - Amount in cents (e.g., 100 = $1.00)
+amount (integer) - Amount in cents (e.g., 100 = $5.00)
 currency (text) - Currency code (DEFAULT 'usd')
 status (text) - 'succeeded' | 'pending' | 'failed' | 'canceled' (DEFAULT 'pending')
 created_at (timestamptz) - DEFAULT now()
@@ -187,7 +187,7 @@ NEXT_PUBLIC_APP_URL=https://www.artisticbuz.com # For production
 ### Payment Creation Flow
 1. **User clicks "Subscribe Now"**
    - `SubscriptionModal` component opens
-   - Shows $1 payment option
+   - Shows $5 payment option
 
 2. **Client-side Request** (`components/subscription/subscription-modal.tsx`)
    ```typescript
@@ -213,7 +213,7 @@ NEXT_PUBLIC_APP_URL=https://www.artisticbuz.com # For production
        price_data: {
          currency: 'usd',
          product_data: { name: 'Hair Calculator Access' },
-         unit_amount: 100, // $1.00
+         unit_amount: 100, // $5.00
        },
        quantity: 1,
      }],
@@ -382,7 +382,7 @@ export function useAuth(): AuthContextType;
 **Purpose:** Modal for purchasing subscription
 
 **Features:**
-- Displays $1 pricing
+- Displays $5 pricing
 - Shows included features
 - One-click checkout button
 - Error handling for failed payments

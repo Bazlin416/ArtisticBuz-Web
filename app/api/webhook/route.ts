@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { createServerSupabaseClient } from '@/lib/supabase-server'; // Use the server client
+import { createServerSupabaseClient } from '@/lib/supabase-server';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,7 +32,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Use the server Supabase client
     const supabase = await createServerSupabaseClient();
     if (!supabase) {
       return NextResponse.json(
@@ -55,12 +54,18 @@ export async function POST(req: NextRequest) {
 
         console.log('[WEBHOOK] Processing subscription for user:', userId);
 
+        // Calculate 14 days from now
+        const currentPeriodStart = new Date();
+        const currentPeriodEnd = new Date();
+        currentPeriodEnd.setDate(currentPeriodEnd.getDate() + 14);
+
         const subscriptionData = {
           user_id: userId,
           stripe_customer_id: session.customer as string,
+          stripe_subscription_id: session.subscription as string || null,
           status: 'active',
-          current_period_start: new Date().toISOString(),
-          current_period_end: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
+          current_period_start: currentPeriodStart.toISOString(),
+          current_period_end: currentPeriodEnd.toISOString(),
           updated_at: new Date().toISOString(),
         };
 
@@ -101,6 +106,32 @@ export async function POST(req: NextRequest) {
         });
 
         console.log('[WEBHOOK] Subscription and payment processed for user:', userId);
+        break;
+      }
+
+      case 'payment_intent.succeeded': {
+        const paymentIntent = event.data.object as Stripe.PaymentIntent;
+        
+        // Update payment status
+        await supabase
+          .from('payments')
+          .update({ status: 'succeeded' })
+          .eq('stripe_payment_intent_id', paymentIntent.id);
+        
+        console.log('[WEBHOOK] Payment intent succeeded:', paymentIntent.id);
+        break;
+      }
+
+      case 'payment_intent.payment_failed': {
+        const paymentIntent = event.data.object as Stripe.PaymentIntent;
+        
+        // Update payment status
+        await supabase
+          .from('payments')
+          .update({ status: 'failed' })
+          .eq('stripe_payment_intent_id', paymentIntent.id);
+        
+        console.log('[WEBHOOK] Payment intent failed:', paymentIntent.id);
         break;
       }
 

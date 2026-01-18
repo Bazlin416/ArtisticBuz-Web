@@ -11,7 +11,7 @@ This application features a professional hair transplant calculator with user au
 - User profile management with gender preferences
 
 ### 2. Subscription System
-- One-time payment of $1 for 14 days access
+- One-time payment of $5 for 14 days access
 - Stripe payment integration
 - Automatic subscription status tracking
 - Premium user badges
@@ -124,7 +124,7 @@ npm start
 1. User visits the site
 2. Clicks on calculator
 3. Prompted to sign up/login
-4. After login, prompted to subscribe ($1)
+4. After login, prompted to subscribe ($5)
 5. Completes Stripe checkout
 6. Redirected to success page
 7. Can now use calculator with full features

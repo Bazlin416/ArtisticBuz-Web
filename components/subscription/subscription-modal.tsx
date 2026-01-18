@@ -23,7 +23,7 @@ export function SubscriptionModal({ isOpen, onClose }: SubscriptionModalProps) {
   const [error, setError] = useState<string | null>(null);
   const [country, setCountry] = useState<string>("default");
   const [detectedCurrency, setDetectedCurrency] = useState<string>("USD");
-  const [detectedAmount, setDetectedAmount] = useState<string>("$1.00");
+  const [detectedAmount, setDetectedAmount] = useState<string>("$5.00");
   const { session, loading: authLoading, checkSubscription } = useAuth();
 
   const [currencyInfo, setCurrencyInfo] = useState<{
