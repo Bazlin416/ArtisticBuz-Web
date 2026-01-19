@@ -2,19 +2,38 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Loader2, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import { Loader2, CheckCircle, XCircle, AlertCircle, RefreshCw } from 'lucide-react';
 import { useAuth } from '@/contexts/auth-context';
 
 export default function SuccessContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const sessionId = searchParams.get('session_id');
-  const { checkSubscription } = useAuth();
-  const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
+  const { checkSubscription, isSubscribed } = useAuth();
+  const [status, setStatus] = useState<'loading' | 'success' | 'verifying' | 'error'>('loading');
   const [message, setMessage] = useState('');
   const [debugInfo, setDebugInfo] = useState('');
   const [retryCount, setRetryCount] = useState(0);
-  const maxRetries = 2; // Reduced since we're not waiting for webhook
+  const maxRetries = 2;
+
+  // Function to verify subscription was actually updated
+  const verifySubscriptionUpdate = async (attempt = 0): Promise<boolean> => {
+    if (attempt >= 3) return false; // Max 3 attempts
+    
+    // Force refresh the subscription status
+    await checkSubscription();
+    
+    // Wait a bit for state to update
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // Check if subscription is now active
+    if (isSubscribed) {
+      return true;
+    }
+    
+    // If not active yet, retry
+    return verifySubscriptionUpdate(attempt + 1);
+  };
 
   const verifyPayment = async () => {
     if (!sessionId) {
@@ -38,24 +57,38 @@ export default function SuccessContent() {
       console.log('✅ Verify payment response:', data);
 
       if (data.success) {
-        setStatus('success');
-        setMessage('Payment successful! Your subscription is now active.');
-        setDebugInfo(`Access granted until: ${new Date(data.subscription.current_period_end).toLocaleDateString()}`);
+        // Step 1: Show "verifying subscription" state
+        setStatus('verifying');
+        setMessage('Payment verified! Activating your subscription...');
+        setDebugInfo('Please wait while we enable your access...');
         
-        // Immediately update auth context
-        setTimeout(() => {
-          checkSubscription();
-        }, 500);
+        // Step 2: Force subscription check and wait for it
+        const subscriptionUpdated = await verifySubscriptionUpdate();
         
-        // Redirect after 3 seconds
-        setTimeout(() => {
-          router.push('/#calculator');
-        }, 3000);
+        if (subscriptionUpdated) {
+          // Step 3: Show success and redirect
+          setStatus('success');
+          setMessage('Subscription activated successfully!');
+          setDebugInfo(`You now have access until ${new Date(data.subscription.current_period_end).toLocaleDateString()}`);
+          
+          // Redirect after showing success for 2 seconds
+          setTimeout(() => {
+            router.push('/#calculator');
+          }, 2000);
+        } else {
+          // Subscription didn't update but payment was successful
+          setStatus('success');
+          setMessage('Payment successful!');
+          setDebugInfo('Your subscription may take a moment to activate. Refreshing the page should fix it.');
+          
+          // Still redirect but with a message
+          setTimeout(() => {
+            router.push('/#calculator');
+          }, 3000);
+        }
         
       } else {
-        // Retry once if it's a temporary error
-        if (retryCount < maxRetries - 1 && 
-            (data.error.includes('temporarily') || data.error.includes('wait'))) {
+        if (retryCount < maxRetries - 1) {
           setRetryCount(prev => prev + 1);
           setDebugInfo(`Retrying... (${retryCount + 1}/${maxRetries})`);
           setTimeout(() => verifyPayment(), 2000);
@@ -117,6 +150,35 @@ export default function SuccessContent() {
           </div>
         )}
 
+        {status === 'verifying' && (
+          <div className="text-center space-y-6">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-24 h-24 border-4 border-blue-100 rounded-full animate-pulse"></div>
+              </div>
+              <RefreshCw className="h-20 w-20 animate-spin text-blue-600 mx-auto" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                Activating Subscription
+              </h2>
+              <p className="text-gray-600 mb-4">
+                {message}
+              </p>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                <p className="text-sm text-blue-800 font-medium">
+                  {debugInfo}
+                </p>
+              </div>
+              <div className="animate-pulse">
+                <p className="text-sm text-gray-500">
+                  This should only take a moment...
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {status === 'success' && (
           <div className="text-center space-y-6">
             <div className="w-24 h-24 bg-gradient-to-r from-emerald-100 to-green-100 rounded-full flex items-center justify-center mx-auto">
@@ -136,7 +198,7 @@ export default function SuccessContent() {
               </div>
               <div className="animate-pulse">
                 <p className="text-sm text-gray-500">
-                  Redirecting to calculator in 3 seconds...
+                  Redirecting to calculator in 2 seconds...
                 </p>
               </div>
             </div>
