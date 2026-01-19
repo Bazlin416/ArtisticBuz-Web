@@ -840,7 +840,7 @@ export default function Home() {
               </button>
 
               <p className="mt-4 text-sm text-white/80 max-w-md">
-                No obligation. Your consultation focuses on assessment, safety, and realistic expectations — not pressure.
+                No obligation. Your consultation focuses on assessment, safety, and realistic expectations, not pressure.
               </p>
             </div>
           </div>
