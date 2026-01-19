@@ -170,3 +170,5 @@ DROP TRIGGER IF EXISTS update_subscriptions_updated_at ON subscriptions;
 CREATE TRIGGER update_subscriptions_updated_at
   BEFORE UPDATE ON subscriptions
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+ALTER TABLE subscriptions ADD COLUMN stripe_session_id TEXT;
