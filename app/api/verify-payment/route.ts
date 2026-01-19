@@ -14,7 +14,7 @@ export async function POST(request: Request) {
     }
 
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-      apiVersion: '2025-11-17.clover' as any,
+      apiVersion: '2025-12-15.clover',
     });
 
     const supabase = await createServerSupabaseClient();
@@ -25,72 +25,76 @@ export async function POST(request: Request) {
       );
     }
 
-    // Retrieve the session from Stripe
+    // 1. Get session from Stripe
     const session = await stripe.checkout.sessions.retrieve(sessionId, {
-      expand: ['payment_intent'],
+      expand: ['payment_intent', 'customer'],
     });
 
-    console.log('Verify Payment - Retrieved session:', {
+    console.log('🔍 Verify Payment - Session:', {
       id: session.id,
       payment_status: session.payment_status,
       status: session.status,
-      customer: session.customer,
       amount_total: session.amount_total,
-      mode: session.mode,
+      currency: session.currency,
       livemode: session.livemode,
+      customer: session.customer,
     });
 
-    // Check if payment was successful in Stripe
+    // 2. Check if payment was successful
     if (session.payment_status !== 'paid') {
       return NextResponse.json({
         success: false,
-        error: `Payment status is ${session.payment_status}`,
+        error: `Payment not completed. Status: ${session.payment_status}`,
       });
     }
 
+    // 3. Get user ID
     const userId = session.metadata?.user_id || session.client_reference_id;
     
     if (!userId) {
+      console.error('❌ No user ID found in session metadata:', session.metadata);
       return NextResponse.json({
         success: false,
-        error: 'No user ID found in session',
+        error: 'No user ID found. Please contact support.',
       });
     }
 
-    console.log('Verify Payment - User ID:', userId);
+    console.log('✅ Payment verified for user:', userId);
 
-    // ALWAYS create/update subscription regardless of webhook
-    // Calculate 14 days from now
+    // 4. Calculate 14 days from NOW (not from session creation)
     const currentPeriodStart = new Date();
     const currentPeriodEnd = new Date();
     currentPeriodEnd.setDate(currentPeriodEnd.getDate() + 14);
     currentPeriodEnd.setHours(23, 59, 59, 999); // End of day
 
+    // 5. Create/Update subscription (UPSERT - update or insert)
     const subscriptionData = {
       user_id: userId,
-      stripe_customer_id: session.customer as string,
-      stripe_subscription_id: session.subscription as string || null,
-      stripe_session_id: session.id, // Store session ID too
+      stripe_customer_id: typeof session.customer === 'string' ? session.customer : (session.customer as any)?.id || null,
+      stripe_session_id: session.id,
+      stripe_payment_intent_id: session.payment_intent ? 
+        (typeof session.payment_intent === 'string' ? session.payment_intent : session.payment_intent.id) : 
+        null,
       status: 'active',
       current_period_start: currentPeriodStart.toISOString(),
       current_period_end: currentPeriodEnd.toISOString(),
       updated_at: new Date().toISOString(),
+      created_at: new Date().toISOString(),
     };
 
-    console.log('Verify Payment - Creating/updating subscription with data:', subscriptionData);
+    console.log('📝 Creating/Updating subscription with:', subscriptionData);
 
-    // Upsert subscription (update if exists, insert if not)
+    // Use upsert to handle both new and existing subscriptions
     const { data: subscription, error: subscriptionError } = await supabase
       .from('subscriptions')
       .upsert(subscriptionData, {
-        onConflict: 'user_id',
-        ignoreDuplicates: false,
+        onConflict: 'user_id', // Update if user already has subscription
       })
       .select()
       .single();
 
     if (subscriptionError) {
-      console.error('Error upserting subscription:', subscriptionError);
+      console.error('❌ Subscription upsert error:', subscriptionError);
       return NextResponse.json({
         success: false,
         error: 'Failed to create/update subscription',
@@ -98,9 +102,9 @@ export async function POST(request: Request) {
       });
     }
 
-    console.log('Verify Payment - Subscription created/updated:', subscription.id);
+    console.log('✅ Subscription created/updated:', subscription.id);
 
-    // Check if payment already exists
+    // 6. Record payment (if not already recorded)
     const { data: existingPayment } = await supabase
       .from('payments')
       .select('id')
@@ -108,10 +112,11 @@ export async function POST(request: Request) {
       .maybeSingle();
 
     if (!existingPayment) {
-      // Record payment
       const { error: paymentError } = await supabase.from('payments').insert({
         user_id: userId,
-        stripe_payment_intent_id: session.payment_intent as string,
+        stripe_payment_intent_id: session.payment_intent ? 
+          (typeof session.payment_intent === 'string' ? session.payment_intent : session.payment_intent.id) : 
+          null,
         stripe_session_id: sessionId,
         subscription_id: subscription.id,
         amount: session.amount_total || 0,
@@ -121,35 +126,16 @@ export async function POST(request: Request) {
       });
 
       if (paymentError) {
-        console.error('Error recording payment:', paymentError);
+        console.error('❌ Payment recording error:', paymentError);
+        // Don't fail the whole process if payment recording fails
       } else {
-        console.log('Payment recorded successfully');
+        console.log('✅ Payment recorded successfully');
       }
     }
 
-    // Check if subscription has expired (just in case)
+    // 7. Return success with subscription details
     const now = new Date();
     const periodEnd = new Date(subscription.current_period_end);
-    const isExpired = periodEnd < now;
-
-    if (isExpired) {
-      // Update to inactive since it's expired
-      await supabase
-        .from('subscriptions')
-        .update({ 
-          status: 'inactive',
-          updated_at: now.toISOString()
-        })
-        .eq('id', subscription.id);
-      
-      return NextResponse.json({
-        success: false,
-        error: 'Subscription has expired. Please renew.',
-        expired: true,
-      });
-    }
-
-    // Calculate days remaining
     const daysRemaining = Math.ceil((periodEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
 
     return NextResponse.json({
@@ -160,17 +146,22 @@ export async function POST(request: Request) {
         status: subscription.status,
         current_period_start: subscription.current_period_start,
         current_period_end: subscription.current_period_end,
-        days_remaining: daysRemaining,
+        days_remaining: daysRemaining > 0 ? daysRemaining : 0,
+      },
+      payment: {
+        amount: (session.amount_total || 0) / 100, // Convert from cents
+        currency: session.currency,
+        status: 'succeeded',
       },
     });
 
   } catch (error: any) {
-    console.error('Verify payment error:', error);
+    console.error('🔥 Verify payment error:', error);
     return NextResponse.json(
       { 
         success: false, 
         error: error.message || 'Payment verification failed',
-        stack: error.stack 
+        code: error.code || 'UNKNOWN_ERROR',
       },
       { status: 500 }
     );

@@ -1,17 +1,24 @@
 // contexts/auth-context.tsx
-'use client';
+"use client";
 
-import { createContext, useContext, useEffect, useState } from 'react';
-import { User, Session, AuthError } from '@supabase/supabase-js';
-import { createClient } from '@/lib/supabase';
-import { checkAndUpdateSubscriptionExpiration } from '@/lib/subscription-utils';
+import { createContext, useContext, useEffect, useState } from "react";
+import { User, Session, AuthError } from "@supabase/supabase-js";
+import { createClient } from "@/lib/supabase";
+import { checkAndUpdateSubscriptionExpiration } from "@/lib/subscription-utils";
 
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
-  signUp: (email: string, password: string, fullName: string) => Promise<{ error: AuthError | null }>;
-  signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
+  signUp: (
+    email: string,
+    password: string,
+    fullName: string,
+  ) => Promise<{ error: AuthError | null }>;
+  signIn: (
+    email: string,
+    password: string,
+  ) => Promise<{ error: AuthError | null }>;
   signOut: () => Promise<void>;
   isSubscribed: boolean;
   checkSubscription: () => Promise<void>;
@@ -26,6 +33,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isSubscribed, setIsSubscribed] = useState(false);
   const supabase = createClient();
 
+  // Update the checkSubscription function
   const checkSubscription = async () => {
     if (!user) {
       setIsSubscribed(false);
@@ -33,10 +41,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     try {
-      const isActive = await checkAndUpdateSubscriptionExpiration(user.id);
-      setIsSubscribed(isActive);
+      const supabase = createClient();
+
+      // Simple check - just see if there's an active subscription
+      const { data, error } = await supabase
+        .from("subscriptions")
+        .select("status, current_period_end")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (error || !data) {
+        setIsSubscribed(false);
+        return;
+      }
+
+      // Check if subscription is active AND not expired
+      const isActive = data.status === "active";
+      const now = new Date();
+      const periodEnd = new Date(data.current_period_end);
+      const isExpired = periodEnd < now;
+
+      setIsSubscribed(isActive && !isExpired);
     } catch (error) {
-      console.error('Error checking subscription:', error);
+      console.error("Error checking subscription:", error);
       setIsSubscribed(false);
     }
   };
@@ -50,13 +77,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
-      }
-    );
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
 
     return () => subscription.unsubscribe();
   }, [supabase]);
@@ -107,17 +134,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     checkSubscription,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 }

@@ -171,4 +171,13 @@ CREATE TRIGGER update_subscriptions_updated_at
   BEFORE UPDATE ON subscriptions
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
-ALTER TABLE subscriptions ADD COLUMN stripe_session_id TEXT;
+-- ALTER TABLE subscriptions ADD COLUMN stripe_session_id TEXT;
+
+-- Add missing columns if they don't exist
+ALTER TABLE subscriptions 
+ADD COLUMN IF NOT EXISTS stripe_session_id TEXT,
+ADD COLUMN IF NOT EXISTS stripe_payment_intent_id TEXT;
+
+-- Create index for faster lookups
+CREATE INDEX IF NOT EXISTS idx_subscriptions_stripe_session ON subscriptions(stripe_session_id);
+CREATE INDEX IF NOT EXISTS idx_subscriptions_user_status ON subscriptions(user_id, status);
