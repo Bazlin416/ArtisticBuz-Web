@@ -116,26 +116,47 @@ export interface PricingTier {
 }
 
 export const pricingTiers: PricingTier[] = [
+  { min: 0, max: 500, price: 110000 },
   { min: 500, max: 1000, price: 110000 },
+  { min: 1000, max: 1500, price: 120000 },
   { min: 1500, max: 2500, price: 150000 },
+  { min: 2500, max: 3500, price: 170000 },
   { min: 3500, max: 4500, price: 180000 },
+  { min: 4500, max: 5000, price: 200000 },
+  { min: 5000, max: 6500, price: 210000 },
 ];
 
 export function calculatePrice(graftMin: number, graftMax: number) {
   if (graftMin === 0 && graftMax === 0) {
     return null;
   }
-  
+
+  // Find which pricing tier matches the average graft count
   const avgGrafts = Math.round((graftMin + graftMax) / 2);
-  const pricePerGraft = 250; // Example: 250 KSH per graft
+
+  const tier = pricingTiers.find(
+    (t) => avgGrafts >= t.min && avgGrafts <= t.max
+  );
+
+  if (tier) {
+    return {
+      min: tier.price,
+      max: tier.price,
+      avg: tier.price,
+    };
+  }
+
+  // Fallback: if grafts are outside defined tiers, calculate with per-graft logic
+  const pricePerGraft = 150; 
   const basePrice = avgGrafts * pricePerGraft;
-  
+
   return {
-    min: Math.round(basePrice * 0.9), // 10% lower
-    max: Math.round(basePrice * 1.1), // 10% higher
-    avg: basePrice
+    min: Math.round(basePrice * 0.9),
+    max: Math.round(basePrice * 1.1),
+    avg: basePrice,
   };
 }
+
 
 export const faqs = [
   {

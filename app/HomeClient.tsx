@@ -22,6 +22,7 @@ import { sanityClient } from "@/lib/sanityClient";
 import Link from 'next/link';
 import { Scissors, Syringe, Sparkles, Brush, UserCheck } from "lucide-react";
 import { urlFor } from '@/lib/sanityImage'
+import { calculatePrice } from '@/lib/calculator-data';
 
 export default function Home() {
   const [selectedTypes, setSelectedTypes] = useState<BaldnessType[]>([]);
@@ -160,14 +161,24 @@ export default function Home() {
   };
 
   const calculateTotals = () => {
-    if (selectedTypes.length === 0) return { totalGraftMin: 0, totalGraftMax: 0, totalGraftsRange: "0", avgGrafts: 0 };
+    if (selectedTypes.length === 0) return { totalGraftMin: 0, totalGraftMax: 0, totalGraftsRange: "0", avgGrafts: 0, totalPriceRange: "" };
     const totalGraftMin = selectedTypes.reduce((sum, type) => sum + type.graftMin, 0);
     const totalGraftMax = selectedTypes.reduce((sum, type) => sum + type.graftMax, 0);
     const avgGrafts = Math.round((totalGraftMin + totalGraftMax) / 2);
-    return { totalGraftMin, totalGraftMax, totalGraftsRange: `${totalGraftMin.toLocaleString()} - ${totalGraftMax.toLocaleString()}`, avgGrafts };
+    const rate = currencyInfo?.rate ?? 1;
+    const priceMin = Math.round(totalGraftMin * 2 * rate);
+    const priceMax = Math.round(totalGraftMax * 2 * rate);
+    const totalPriceRange = `${detectedCurrency} ${priceMin.toLocaleString()} - ${priceMax.toLocaleString()}`;
+    return { totalGraftMin, totalGraftMax, totalGraftsRange: `${totalGraftMin.toLocaleString()} - ${totalGraftMax.toLocaleString()}`, avgGrafts, totalPriceRange };
   };
   const totals = calculateTotals();
 
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('en-US').format(price);
+  };
+
+  const priceInfo = calculatePrice(totals.totalGraftMin, totals.totalGraftMax);
+  
   return (
     <div className="min-h-screen bg-gray-50">
       <main className="pt-20">
@@ -864,6 +875,7 @@ export default function Home() {
           onClose={() => setIsConsultationModalOpen(false)}
           selectedType={selectedTypes.map((t) => t.title).join(", ")}
           estimatedGrafts={totals.totalGraftsRange}
+          estimatedPrice={formatPrice(priceInfo.min)}
         />
       )}
     </div>

@@ -113,7 +113,7 @@ interface ConsultationFormModalProps {
   onClose: () => void;
   selectedType: string;
   estimatedGrafts: string;
-  estimatedPrice?: string;
+  estimatedPrice?: any;
 }
 
 export function ConsultationFormModal({
