@@ -179,6 +179,8 @@ export default function Home() {
 
   const priceInfo = calculatePrice(totals.totalGraftMin, totals.totalGraftMax);
   
+  const defaultPrice = "0";
+  
   return (
     <div className="min-h-screen bg-gray-50">
       <main className="pt-20">
@@ -875,7 +877,7 @@ export default function Home() {
           onClose={() => setIsConsultationModalOpen(false)}
           selectedType={selectedTypes.map((t) => t.title).join(", ")}
           estimatedGrafts={totals.totalGraftsRange}
-          estimatedPrice={formatPrice(priceInfo.min)}
+          estimatedPrice={priceInfo ? formatPrice(priceInfo.min) : defaultPrice}
         />
       )}
     </div>
