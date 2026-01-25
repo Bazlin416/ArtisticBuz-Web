@@ -178,9 +178,9 @@ export default function Home() {
   };
 
   const priceInfo = calculatePrice(totals.totalGraftMin, totals.totalGraftMax);
-  
+
   const defaultPrice = "0";
-  
+
   return (
     <div className="min-h-screen bg-gray-50">
       <main className="pt-20">
@@ -642,6 +642,14 @@ export default function Home() {
                     gradient: "from-purple-100 via-pink-100 to-purple-200",
                     iconColor: "text-purple-600",
                   },
+                  {
+                    icon: Sparkles,
+                    title: "Flexible Payment Options",
+                    desc: "Some partner clinics offer installment or financing options to help make treatment more accessible. Availability and terms vary and are discussed directly with the clinic after matching.",
+                    gradient: "from-blue-100 via-sky-100 to-blue-200",
+                    iconColor: "text-blue-600",
+                  },
+
                 ].map((pillar, idx) => (
                   <div
                     key={idx}
