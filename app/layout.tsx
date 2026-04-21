@@ -34,6 +34,14 @@ export const metadata: Metadata = {
     description:
       "Use a professional hair graft calculator and explore expert insights on hair restoration and hair loss.",
     url: "https://artisticbuz.com",
+    images: [
+      {
+        url: "https://artisticbuz.com/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "ArtisticBuz – Hair Graft Calculator",
+      },
+    ],
   },
 
   twitter: {
@@ -41,6 +49,7 @@ export const metadata: Metadata = {
     title: "ArtisticBuz – Hair Graft Calculator",
     description:
       "Estimate hair graft needs and explore expert hair restoration insights.",
+    images: ["https://artisticbuz.com/og-image.png"],
   },
 };
 

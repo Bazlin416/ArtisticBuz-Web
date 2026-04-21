@@ -101,7 +101,7 @@ const BLOG_POST_QUERY = `
   excerpt,
   publishedAt,
   updatedAt,
-  author,
+  "author": author->{ name, role, "image": image.asset->url },
   topic,
   tags,
   contentType,
@@ -244,7 +244,7 @@ export default async function BlogPostPage({
 
                     {/* Meta */}
                     <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-gray-500 mb-12">
-                        <span>By {blog.author}</span>
+                        <span>By {blog.author?.name ?? 'ArtisticBuz'}{blog.author?.role ? ` · ${blog.author.role}` : ''}</span>
                         <span>•</span>
                         <time>{new Date(blog.publishedAt).toLocaleDateString()}</time>
 
@@ -298,13 +298,32 @@ export default async function BlogPostPage({
                         </div>
                     )}
 
-                    {/* Back */}
-                    <Link
-                        href="/blogs"
-                        className="inline-block mb-8 text-emerald-600 font-semibold hover:underline"
-                    >
-                        ← Back to Blogs
-                    </Link>
+                    {/* CTA Banner */}
+                    <div className="mt-16 rounded-3xl bg-gradient-to-br from-emerald-600 via-teal-600 to-emerald-700 p-10 text-center text-white shadow-xl">
+                        <p className="text-xs font-semibold uppercase tracking-widest text-emerald-200 mb-3">
+                            Take the Next Step
+                        </p>
+                        <h2 className="text-2xl md:text-3xl font-bold mb-4 leading-tight">
+                            Ready to Know Exactly How Many Grafts You Need?
+                        </h2>
+                        <p className="text-emerald-100 mb-8 max-w-lg mx-auto leading-relaxed">
+                            Use our professional hair graft calculator for a clinically guided estimate — then speak with a specialist to turn it into a personalised treatment plan.
+                        </p>
+                        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                            <Link
+                                href="/#calculator"
+                                className="px-8 py-4 rounded-xl bg-white text-emerald-700 font-semibold text-lg hover:bg-emerald-50 shadow-lg transition-all duration-300"
+                            >
+                                Use the Calculator →
+                            </Link>
+                            <Link
+                                href="/blogs"
+                                className="px-8 py-4 rounded-xl border-2 border-white/60 text-white font-semibold text-lg hover:bg-white/10 transition-all duration-300"
+                            >
+                                ← More Articles
+                            </Link>
+                        </div>
+                    </div>
                 </div>
             </article>
 
@@ -320,7 +339,7 @@ export default async function BlogPostPage({
                             : undefined,
                         author: {
                             "@type": "Person",
-                            name: blog.author,
+                            name: blog.author?.name ?? 'ArtisticBuz',
                         },
                         datePublished: blog.publishedAt,
                         dateModified: blog.updatedAt || blog.publishedAt,

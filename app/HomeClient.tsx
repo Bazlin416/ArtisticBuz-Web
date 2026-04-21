@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { BaldnessTypeGrid } from "@/components/calculator/baldness-type-grid";
 import { ResultPanel } from "@/components/calculator/result-panel";
 import { ConsultationFormModal } from "@/components/calculator/consultation-form-modal";
@@ -9,11 +9,12 @@ import { AuthModal } from "@/components/auth/auth-modal";
 import { SubscriptionModal } from "@/components/subscription/subscription-modal";
 import { baldnessTypes } from "@/lib/calculator-data";
 import { BaldnessType } from "@/types/calculator";
-import { Calculator, Shield, Award, Users, Lock } from "lucide-react";
+import { Calculator, Shield, Award, Users, Lock, History, ChevronDown, ChevronUp, RotateCcw } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
 import { Button } from "@/components/ui/button";
 import type { GenderPreference } from "@/lib/calculator-data";
 import { CurrencyService } from "@/lib/currency-service";
+import { useCalculationHistory } from "@/lib/use-calculation-history";
 import HairSpline from "@/components/HairSpline";
 import HairGraftCalculator from "@/components/HairCalculator";
 import { AreaKey } from "@/lib/spline-area-map";
@@ -22,7 +23,6 @@ import { sanityClient } from "@/lib/sanityClient";
 import Link from 'next/link';
 import { Scissors, Syringe, Sparkles, Brush, UserCheck } from "lucide-react";
 import { urlFor } from '@/lib/sanityImage'
-import { calculatePrice } from '@/lib/calculator-data';
 
 export default function Home() {
   const [selectedTypes, setSelectedTypes] = useState<BaldnessType[]>([]);
@@ -30,7 +30,7 @@ export default function Home() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
   const [genderPreference, setGenderPreference] = useState<GenderPreference>("neutral");
-  const { user, isSubscribed, loading } = useAuth();
+  const { user, isSubscribed, loading, subscriptionLoading } = useAuth();
   const [country, setCountry] = useState<string>("");
   const [currencyInfo, setCurrencyInfo] = useState<{ currency: string; display: string; rate: number; } | null>(null);
   const [loadingCurrency, setLoadingCurrency] = useState(true);
@@ -38,6 +38,11 @@ export default function Home() {
   const [detectedAmount, setDetectedAmount] = useState<string>("");
   const [currentSlide, setCurrentSlide] = useState(0);
   const [selectedArea, setSelectedArea] = useState<AreaKey | null>(null);
+  const [hairType, setHairType] = useState<"straight" | "wavy" | "curly" | "afro">("straight");
+  const [desiredDensity, setDesiredDensity] = useState<"sparse" | "natural" | "dense">("natural");
+  const { history, save: saveHistory, clear: clearHistory } = useCalculationHistory();
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const lastSavedRef = useRef<string>("");
 
   const heroImages = [
     { src: "/American-man.png", alt: "Male hair transplant result" },
@@ -72,6 +77,7 @@ export default function Home() {
 
 
   const [latestBlogs, setLatestBlogs] = useState<any[]>([]);
+  const [blogsLoading, setBlogsLoading] = useState(true);
 
   useEffect(() => {
     const fetchBlogs = async () => {
@@ -80,6 +86,8 @@ export default function Home() {
         setLatestBlogs(blogs);
       } catch (err) {
         console.error("Error fetching blogs:", err);
+      } finally {
+        setBlogsLoading(false);
       }
     };
     fetchBlogs();
@@ -120,6 +128,8 @@ export default function Home() {
   useEffect(() => { detectCountry(); }, []);
 
   const [partners, setPartners] = useState<any[]>([]);
+  const [partnerFilter, setPartnerFilter] = useState<string>("All");
+  const [partnersLoading, setPartnersLoading] = useState(true);
 
   useEffect(() => {
     const fetchPartners = async () => {
@@ -128,6 +138,8 @@ export default function Home() {
         setPartners(data);
       } catch (err) {
         console.error("Error fetching partners:", err);
+      } finally {
+        setPartnersLoading(false);
       }
     };
     fetchPartners();
@@ -150,36 +162,57 @@ export default function Home() {
 
   const handleConsultationClick = () => {
     if (!user) { setIsAuthModalOpen(true); return; }
-    if (!isSubscribed) {
-      const calculatorSection = document.getElementById("calculator");
-      if (calculatorSection) {
-        calculatorSection.scrollIntoView({ behavior: "smooth", block: "center" });
-      }
-      return;
-    }
+    if (!isSubscribed) { setIsSubscriptionModalOpen(true); return; }
     setIsConsultationModalOpen(true);
   };
 
   const calculateTotals = () => {
-    if (selectedTypes.length === 0) return { totalGraftMin: 0, totalGraftMax: 0, totalGraftsRange: "0", avgGrafts: 0, totalPriceRange: "" };
-    const totalGraftMin = selectedTypes.reduce((sum, type) => sum + type.graftMin, 0);
-    const totalGraftMax = selectedTypes.reduce((sum, type) => sum + type.graftMax, 0);
+    if (selectedTypes.length === 0) return { totalGraftMin: 0, totalGraftMax: 0, totalGraftsRange: "0", avgGrafts: 0, totalPriceRange: "", adjustmentNote: null as string | null };
+    const rawMin = selectedTypes.reduce((sum, type) => sum + type.graftMin, 0);
+    const rawMax = selectedTypes.reduce((sum, type) => sum + type.graftMax, 0);
+    const genderMultiplier = genderPreference === "female" ? 0.80 : 1;
+    const hairTypeMultipliers: Record<string, number> = { straight: 1.0, wavy: 1.0, curly: 1.05, afro: 1.18 };
+    const densityMultipliers: Record<string, number> = { sparse: 0.75, natural: 1.0, dense: 1.30 };
+    const hairMultiplier = hairTypeMultipliers[hairType] ?? 1;
+    const densityMultiplier = densityMultipliers[desiredDensity] ?? 1;
+    const combined = genderMultiplier * hairMultiplier * densityMultiplier;
+    const totalGraftMin = Math.round(rawMin * combined);
+    const totalGraftMax = Math.round(rawMax * combined);
     const avgGrafts = Math.round((totalGraftMin + totalGraftMax) / 2);
     const rate = currencyInfo?.rate ?? 1;
     const priceMin = Math.round(totalGraftMin * 2 * rate);
     const priceMax = Math.round(totalGraftMax * 2 * rate);
-    const totalPriceRange = `${detectedCurrency} ${priceMin.toLocaleString()} - ${priceMax.toLocaleString()}`;
-    return { totalGraftMin, totalGraftMax, totalGraftsRange: `${totalGraftMin.toLocaleString()} - ${totalGraftMax.toLocaleString()}`, avgGrafts, totalPriceRange };
+    const totalPriceRange = loadingCurrency
+      ? "Calculating..."
+      : `${detectedCurrency} ${priceMin.toLocaleString()} – ${priceMax.toLocaleString()}`;
+    const notes: string[] = [];
+    if (genderPreference === "female") notes.push("Female pattern (−20%)");
+    if (hairType === "curly") notes.push("Curly texture (+5%)");
+    if (hairType === "afro") notes.push("Afro texture (+18%)");
+    if (desiredDensity === "sparse") notes.push("Sparse density (−25%)");
+    if (desiredDensity === "dense") notes.push("Dense density (+30%)");
+    const adjustmentNote = notes.length > 0 ? `Adjustments applied: ${notes.join(", ")}` : null;
+    return { totalGraftMin, totalGraftMax, totalGraftsRange: `${totalGraftMin.toLocaleString()} – ${totalGraftMax.toLocaleString()}`, avgGrafts, totalPriceRange, adjustmentNote };
   };
   const totals = calculateTotals();
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-US').format(price);
+  // Auto-save when a non-loading result is produced
+  useEffect(() => {
+    if (selectedTypes.length === 0 || loadingCurrency || totals.totalPriceRange === "Calculating...") return;
+    const key = `${selectedTypes.map((t) => t.id).join(",")}|${hairType}|${desiredDensity}|${genderPreference}|${totals.totalPriceRange}`;
+    if (lastSavedRef.current === key) return;
+    lastSavedRef.current = key;
+    saveHistory({ selectedTypes, hairType, desiredDensity, genderPreference, totalGraftsRange: totals.totalGraftsRange, totalPriceRange: totals.totalPriceRange });
+  }, [selectedTypes, hairType, desiredDensity, genderPreference, totals.totalPriceRange, loadingCurrency]);
+
+  const restoreHistory = (record: typeof history[number]) => {
+    setSelectedTypes(record.selectedTypes);
+    setHairType(record.hairType);
+    setDesiredDensity(record.desiredDensity);
+    setGenderPreference(record.genderPreference);
+    setHistoryOpen(false);
+    setTimeout(() => document.getElementById("calculator")?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
   };
-
-  const priceInfo = calculatePrice(totals.totalGraftMin, totals.totalGraftMax);
-
-  const defaultPrice = "0";
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -224,24 +257,22 @@ export default function Home() {
                 <div className="flex flex-col sm:flex-row gap-4 pt-4 items-center sm:items-start">
                   <button
                     onClick={() => {
+                      if (!user) { setIsAuthModalOpen(true); return; }
+                      if (!isSubscribed) { setIsSubscriptionModalOpen(true); return; }
                       const calculatorSection = document.getElementById("calculator");
                       if (calculatorSection) calculatorSection.scrollIntoView({ behavior: "smooth", block: "start" });
                     }}
-                    disabled={loading || !isSubscribed}
-                    className={`${user && isSubscribed ? "bg-white text-emerald-700 hover:bg-emerald-50 hover:shadow-xl" : "bg-white/80 text-emerald-700/70 cursor-not-allowed opacity-75"} px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 shadow-lg relative`}
+                    disabled={loading}
+                    className={`${loading ? "opacity-50 cursor-not-allowed" : "bg-white text-emerald-700 hover:bg-emerald-50 hover:shadow-xl cursor-pointer"} px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 shadow-lg relative`}
                   >
-                    Start Your Assessment
-                    {!loading && !isSubscribed && (
-                      <span className="absolute -top-2 -right-2 bg-amber-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg">
-                        SUBSCRIBE
-                      </span>
-                    )}
+                    {!user ? "Sign In to Start" : !isSubscribed ? "Subscribe to Start" : "Start Your Assessment"}
                   </button>
 
                   <button
                     onClick={handleConsultationClick}
-                    className="text-white/90 underline underline-offset-4 hover:text-white text-sm font-medium"
+                    className="flex items-center gap-2 px-8 py-4 rounded-xl font-semibold text-lg border-2 border-white/70 text-white hover:bg-white hover:text-emerald-700 transition-all duration-300 shadow-lg"
                   >
+                    <UserCheck className="w-5 h-5" />
                     Speak to a Specialist
                   </button>
                 </div>
@@ -275,8 +306,8 @@ export default function Home() {
                   </div>
                 </div>
 
-                <div className="absolute -bottom-4 -right-4 bg-white text-emerald-700 px-4 py-2 rounded-xl shadow-lg font-bold text-sm">
-                  Real Patient Results
+                <div className="absolute -bottom-4 -right-4 bg-white text-gray-500 px-3 py-1.5 rounded-lg shadow text-xs italic">
+                  Illustrative results — individual outcomes vary
                 </div>
               </div>
 
@@ -369,7 +400,11 @@ export default function Home() {
                   {/* Price Block – FIXED */}
                   <div className="mt-auto pt-4 border-t border-emerald-300/50">
                     <div className="text-emerald-700 font-semibold text-lg">
-                      From {detectedAmount}
+                      {loadingCurrency ? (
+                        <span className="inline-block w-20 h-5 bg-emerald-200 rounded animate-pulse" />
+                      ) : (
+                        `From ${detectedAmount}`
+                      )}
                     </div>
 
                     <div className="mt-1 text-sm text-gray-600">
@@ -492,8 +527,17 @@ export default function Home() {
             {/* Access States */}
             <div className="space-y-8 mb-12">
 
+              {/* Subscription loading skeleton */}
+              {(loading || subscriptionLoading) && (
+                <div className="max-w-7xl mx-auto bg-gray-100 rounded-3xl p-8 text-center animate-pulse">
+                  <div className="h-8 w-48 bg-gray-200 rounded mx-auto mb-4" />
+                  <div className="h-4 w-80 bg-gray-200 rounded mx-auto mb-2" />
+                  <div className="h-4 w-64 bg-gray-200 rounded mx-auto" />
+                </div>
+              )}
+
               {/* Not signed in */}
-              {!loading && !user && (
+              {!loading && !subscriptionLoading && !user && (
                 <div className="max-w-7xl mx-auto bg-blue-50 border border-blue-200 rounded-3xl p-8 text-center shadow hover:shadow-lg transition-all">
                   <Lock className="w-10 h-10 text-blue-600 mx-auto mb-4" />
                   <h3 className="text-xl font-semibold text-gray-900 mb-2">
@@ -512,35 +556,40 @@ export default function Home() {
               )}
 
               {/* Signed in but not subscribed */}
-              {!loading && user && !isSubscribed && (
+              {!loading && !subscriptionLoading && user && !isSubscribed && (
                 <div className="max-w-7xl mx-auto bg-amber-50 border border-amber-200 rounded-3xl p-8 text-center shadow hover:shadow-lg transition-all">
                   <Lock className="w-10 h-10 text-amber-600 mx-auto mb-4" />
                   <h3 className="text-xl font-semibold text-gray-900 mb-2">
                     Unlock Full Calculator Access
                   </h3>
                   <p className="text-gray-600 mb-6">
-                    Get 14-day full access to personalized graft estimates and cost breakdowns for just{" "}
-                    <strong>{detectedAmount}</strong>.
+                    Get <strong>14-day full access</strong> to personalized graft estimates and cost
+                    breakdowns for just{" "}
+                    {loadingCurrency ? (
+                      <span className="inline-block w-16 h-4 bg-amber-200 rounded animate-pulse align-middle" />
+                    ) : (
+                      <strong>{detectedAmount}</strong>
+                    )}.
                   </p>
                   <Button
                     onClick={() => setIsSubscriptionModalOpen(true)}
                     className="bg-amber-600 hover:bg-amber-700 text-white font-semibold px-8 py-3 rounded-xl shadow-lg"
                   >
-                    Subscribe Now — {detectedAmount}
+                    {loadingCurrency ? "Subscribe Now" : `Subscribe Now — ${detectedAmount}`}
                   </Button>
                 </div>
               )}
             </div>
 
             {/* Active Calculator */}
-            {user && isSubscribed && (
+            {user && isSubscribed && !subscriptionLoading && (
               <div className="space-y-10">
 
                 {/* Gender Preference */}
                 <div className="flex flex-col items-center gap-4">
                   <p className="text-sm text-gray-500">Select reference pattern</p>
 
-                  <div className="inline-flex bg-gray-100 rounded-2xl p-1 shadow-inner">
+                  <div className="inline-flex bg-gray-100 rounded-2xl p-1 shadow-inner" role="group" aria-label="Reference pattern">
                     {[
                       { key: "neutral", label: "Neutral" },
                       { key: "male", label: "Male" },
@@ -549,6 +598,7 @@ export default function Home() {
                       <button
                         key={option.key}
                         onClick={() => setGenderPreference(option.key as GenderPreference)}
+                        aria-pressed={genderPreference === option.key}
                         className={`px-6 py-2.5 rounded-xl font-medium text-sm transition-all ${genderPreference === option.key
                           ? "bg-white text-emerald-700 shadow"
                           : "text-gray-600 hover:text-gray-900"
@@ -574,6 +624,58 @@ export default function Home() {
                   )}
                 </div>
 
+                {/* Hair Type + Density Selectors */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <p className="text-sm text-gray-500 text-center">Hair texture</p>
+                    <div className="grid grid-cols-4 w-full bg-gray-100 rounded-2xl p-1 shadow-inner" role="group" aria-label="Hair texture">
+                      {[
+                        { key: "straight", label: "Straight" },
+                        { key: "wavy", label: "Wavy" },
+                        { key: "curly", label: "Curly" },
+                        { key: "afro", label: "Afro" },
+                      ].map((opt) => (
+                        <button
+                          key={opt.key}
+                          onClick={() => setHairType(opt.key as typeof hairType)}
+                          aria-pressed={hairType === opt.key}
+                          className={`py-2 rounded-xl font-medium text-xs transition-all truncate px-1 ${hairType === opt.key ? "bg-white text-emerald-700 shadow" : "text-gray-600 hover:text-gray-900"}`}
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <p className="text-sm text-gray-500 text-center">Desired density</p>
+                    <div className="inline-flex w-full bg-gray-100 rounded-2xl p-1 shadow-inner" role="group" aria-label="Desired density">
+                      {[
+                        { key: "sparse", label: "Sparse" },
+                        { key: "natural", label: "Natural" },
+                        { key: "dense", label: "Dense" },
+                      ].map((opt) => (
+                        <button
+                          key={opt.key}
+                          onClick={() => setDesiredDensity(opt.key as typeof desiredDensity)}
+                          aria-pressed={desiredDensity === opt.key}
+                          className={`flex-1 py-2 rounded-xl font-medium text-sm transition-all ${desiredDensity === opt.key ? "bg-white text-emerald-700 shadow" : "text-gray-600 hover:text-gray-900"}`}
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Empty state hint */}
+                {selectedTypes.length === 0 && (
+                  <div className="text-center py-6 px-4 bg-white rounded-2xl border-2 border-dashed border-emerald-200">
+                    <p className="text-gray-700 font-medium mb-1">Select the card that best matches your hair loss pattern</p>
+                    <p className="text-sm text-gray-500">You can select multiple types for a combined estimate. Your results will appear below.</p>
+                  </div>
+                )}
+
                 {/* Baldness Grid */}
                 <BaldnessTypeGrid
                   types={baldnessTypes}
@@ -585,12 +687,67 @@ export default function Home() {
 
                 {/* Results */}
                 {selectedTypes.length > 0 && (
-                  <div id="results" className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                  <div id="results" className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-3">
+                    {totals.adjustmentNote && (
+                      <div className="flex items-start gap-2 bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 text-sm text-blue-700">
+                        <span className="mt-0.5">ℹ️</span>
+                        <span>
+                          <strong>{totals.adjustmentNote}.</strong> A specialist consultation will confirm your exact graft requirements.
+                        </span>
+                      </div>
+                    )}
                     <ResultPanel
                       selectedTypes={selectedTypes}
                       onConsultationClick={() => setIsConsultationModalOpen(true)}
                       totals={totals}
                     />
+                  </div>
+                )}
+
+                {/* Recent Estimates */}
+                {history.length > 0 && (
+                  <div className="border border-gray-200 rounded-2xl overflow-hidden">
+                    <button
+                      onClick={() => setHistoryOpen((o) => !o)}
+                      aria-expanded={historyOpen}
+                      aria-controls="history-panel"
+                      className="w-full flex items-center justify-between px-5 py-4 bg-white hover:bg-gray-50 transition-colors"
+                    >
+                      <span className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+                        <History className="w-4 h-4 text-emerald-600" />
+                        Recent Estimates ({history.length})
+                      </span>
+                      {historyOpen ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
+                    </button>
+
+                    {historyOpen && (
+                      <div id="history-panel" className="divide-y divide-gray-100 bg-gray-50">
+                        {history.map((record) => (
+                          <div key={record.id} className="flex items-center justify-between px-5 py-3 gap-4">
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-gray-800 truncate">
+                                {record.selectedTypes.map((t) => t.title).join(", ")}
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                {record.totalGraftsRange} grafts · {record.totalPriceRange} · {record.hairType} · {record.desiredDensity}
+                              </p>
+                            </div>
+                            <button
+                              onClick={() => restoreHistory(record)}
+                              className="flex items-center gap-1 text-xs font-medium text-emerald-600 hover:text-emerald-700 shrink-0"
+                            >
+                              <RotateCcw className="w-3.5 h-3.5" />
+                              Restore
+                            </button>
+                          </div>
+                        ))}
+                        <div className="px-5 py-3 text-right">
+                          <button onClick={clearHistory} className="text-xs text-gray-400 hover:text-red-500 transition-colors">
+                            Clear history
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -722,9 +879,42 @@ export default function Home() {
               </p>
             </div>
 
+            {/* Partner Skeleton */}
+            {partnersLoading && (
+              <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="bg-gray-100 rounded-3xl p-6 animate-pulse flex flex-col items-center gap-4">
+                    <div className="w-full h-32 bg-gray-200 rounded-2xl" />
+                    <div className="h-4 w-32 bg-gray-200 rounded" />
+                    <div className="h-3 w-24 bg-gray-200 rounded" />
+                    <div className="h-8 w-28 bg-gray-200 rounded-xl" />
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Country Filter */}
+            {!partnersLoading && partners.length > 0 && (() => {
+              const countries = ["All", ...Array.from(new Set(partners.map((p) => p.country).filter(Boolean)))];
+              return (
+                <div className="flex flex-wrap justify-center gap-2 mb-10">
+                  {countries.map((c) => (
+                    <button
+                      key={c}
+                      onClick={() => setPartnerFilter(c)}
+                      className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all border ${partnerFilter === c ? "bg-emerald-600 text-white border-emerald-600" : "bg-white text-gray-600 border-gray-200 hover:border-emerald-400 hover:text-emerald-700"}`}
+                    >
+                      {c}
+                    </button>
+                  ))}
+                </div>
+              );
+            })()}
+
             {/* Partner Grid */}
+            {!partnersLoading && (
             <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-              {partners.map((partner, idx) => (
+              {partners.filter((p) => partnerFilter === "All" || p.country === partnerFilter).map((partner, idx) => (
                 <div
                   key={idx}
                   className="bg-gradient-to-br from-emerald-50 via-teal-50 to-emerald-100 border-2 border-emerald-200 rounded-3xl p-6 shadow-md hover:shadow-xl transition-all flex flex-col items-center text-center"
@@ -766,6 +956,7 @@ export default function Home() {
                 </div>
               ))}
             </div>
+            )}
 
           </div>
         </section>
@@ -787,7 +978,19 @@ export default function Home() {
 
             {/* Blog Cards */}
             <div className="grid md:grid-cols-3 gap-8">
-              {latestBlogs.map((blog: any) => (
+              {blogsLoading
+                ? Array.from({ length: 3 }).map((_, i) => (
+                    <div key={i} className="bg-white rounded-3xl overflow-hidden shadow-sm animate-pulse">
+                      <div className="h-48 bg-gray-200 w-full" />
+                      <div className="p-6 space-y-3">
+                        <div className="h-4 bg-gray-200 rounded w-3/4" />
+                        <div className="h-3 bg-gray-200 rounded w-full" />
+                        <div className="h-3 bg-gray-200 rounded w-5/6" />
+                        <div className="h-8 w-28 bg-gray-200 rounded-xl mt-4" />
+                      </div>
+                    </div>
+                  ))
+                : latestBlogs.map((blog: any) => (
                 <article key={blog.slug.current} className="group bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all flex flex-col">
                   {blog.mainImage && (
                     <div className="relative h-48 w-full overflow-hidden">
@@ -812,6 +1015,7 @@ export default function Home() {
                 </article>
               ))}
             </div>
+
 
             {/* Mobile CTA */}
             <div className="mt-12 text-center md:hidden">
@@ -842,22 +1046,11 @@ export default function Home() {
 
             <div className="relative inline-flex flex-col items-center">
               <button
-                onClick={() => {
-                  const calculatorSection = document.getElementById("calculator");
-                  if (calculatorSection) calculatorSection.scrollIntoView({ behavior: "smooth", block: "start" });
-                }}
-                disabled={loading || !isSubscribed}
-                className={`${user && isSubscribed
-                  ? "bg-white text-emerald-700 hover:bg-emerald-50 hover:shadow-2xl cursor-pointer"
-                  : "bg-white/80 text-emerald-700/70 cursor-not-allowed opacity-80"
-                  } font-semibold px-10 py-5 rounded-xl text-lg transition-all duration-300 shadow-xl relative pr-16`}
+                onClick={handleConsultationClick}
+                disabled={loading}
+                className={`${loading ? "opacity-50 cursor-not-allowed" : "bg-white text-emerald-700 hover:bg-emerald-50 hover:shadow-2xl cursor-pointer"} font-semibold px-10 py-5 rounded-xl text-lg transition-all duration-300 shadow-xl`}
               >
                 Book a Specialist Consultation
-                {!loading && !isSubscribed && (
-                  <span className="absolute -top-2 -right-2 bg-amber-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg">
-                    Subscription Required
-                  </span>
-                )}
               </button>
 
               <p className="mt-4 text-sm text-white/80 max-w-md">
@@ -872,11 +1065,24 @@ export default function Home() {
       <AuthModal
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
+        onSuccess={() => {
+          // Wait for subscriptionLoading to settle, then guide the user forward
+          setTimeout(() => {
+            if (isSubscribed) {
+              document.getElementById("calculator")?.scrollIntoView({ behavior: "smooth", block: "start" });
+            } else {
+              setIsSubscriptionModalOpen(true);
+            }
+          }, 800);
+        }}
       />
 
       <SubscriptionModal
         isOpen={isSubscriptionModalOpen}
         onClose={() => setIsSubscriptionModalOpen(false)}
+        detectedCountry={country}
+        detectedAmount={detectedAmount}
+        detectedCurrency={detectedCurrency}
       />
 
       {selectedTypes.length > 0 && (
@@ -885,7 +1091,8 @@ export default function Home() {
           onClose={() => setIsConsultationModalOpen(false)}
           selectedType={selectedTypes.map((t) => t.title).join(", ")}
           estimatedGrafts={totals.totalGraftsRange}
-          estimatedPrice={priceInfo ? formatPrice(priceInfo.min) : defaultPrice}
+          estimatedPrice={totals.totalPriceRange}
+          userEmail={user?.email ?? undefined}
         />
       )}
     </div>

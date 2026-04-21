@@ -1,9 +1,8 @@
 'use client';
 
 import { BaldnessType } from '@/types/calculator';
-import { calculatePrice } from '@/lib/calculator-data';
 import { Button } from '@/components/ui/button';
-import { Calculator, DollarSign, Scissors, X } from 'lucide-react';
+import { Calculator, DollarSign, Scissors } from 'lucide-react';
 
 interface ResultPanelProps {
   selectedTypes: BaldnessType[];
@@ -13,20 +12,15 @@ interface ResultPanelProps {
     totalGraftMax: number;
     totalGraftsRange: string;
     avgGrafts: number;
+    totalPriceRange: string;
   };
 }
 
-export function ResultPanel({ 
-  selectedTypes, 
+export function ResultPanel({
+  selectedTypes,
   onConsultationClick,
-  totals 
+  totals
 }: ResultPanelProps) {
-  const priceInfo = calculatePrice(totals.totalGraftMin, totals.totalGraftMax);
-
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-US').format(price);
-  };
-
   return (
     <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl p-8 shadow-lg border border-emerald-100">
       <div className="flex items-center gap-3 mb-6">
@@ -73,18 +67,13 @@ export function ResultPanel({
         <div className="bg-white rounded-xl p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-2">
             <DollarSign className="w-5 h-5 text-emerald-600" />
-            <p className="text-sm font-medium text-gray-600">Estimated Cost (KSH)</p>
+            <p className="text-sm font-medium text-gray-600">Estimated Cost</p>
           </div>
-          {priceInfo ? (
+          {totals.totalPriceRange ? (
             <>
-              <p className="text-3xl font-bold text-emerald-600">
-                KSH {formatPrice(priceInfo.min)}
+              <p className="text-2xl font-bold text-emerald-600 leading-tight">
+                {totals.totalPriceRange}
               </p>
-              {priceInfo.max && priceInfo.min !== priceInfo.max && (
-                <p className="text-xs text-gray-500 mt-1">
-                  Range: {formatPrice(priceInfo.min)} - {formatPrice(priceInfo.max)}
-                </p>
-              )}
               <p className="text-xs text-gray-500 mt-1">Based on {totals.avgGrafts.toLocaleString()} grafts</p>
             </>
           ) : (
@@ -128,11 +117,11 @@ export function ResultPanel({
         size="lg"
         className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-6 text-lg shadow-md hover:shadow-lg transition-shadow"
       >
-        Get Free Consultation
+        Request a Free Consultation
       </Button>
 
       <p className="text-center text-xs text-gray-500 mt-4">
-        Submit your details and photos for a personalized assessment from our specialists
+        Submit your details for a personalized assessment from our specialists. Response within 24 hours.
       </p>
     </div>
   );

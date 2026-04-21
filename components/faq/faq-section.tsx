@@ -1,20 +1,42 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import { faqs } from '@/lib/calculator-data';
+import { faqs as hardcodedFaqs } from '@/lib/calculator-data';
+import { sanityClient } from '@/lib/sanityClient';
 import { HelpCircle } from 'lucide-react';
 
+interface FAQ {
+  question: string;
+  answer: string;
+}
+
+const FAQ_QUERY = `
+  *[_type == "faq" && isActive == true]
+  | order(displayOrder asc) {
+    question,
+    answer
+  }
+`;
+
 export function FAQSection() {
+  const [faqs, setFaqs] = useState<FAQ[]>(hardcodedFaqs);
+
+  useEffect(() => {
+    sanityClient.fetch<FAQ[]>(FAQ_QUERY).then((data) => {
+      if (data && data.length > 0) setFaqs(data);
+    }).catch(() => {
+      // silently keep hardcoded fallback
+    });
+  }, []);
+
   return (
-    <section
-      className="py-28 bg-white"
-      id="faq"
-    >
+    <section className="py-28 bg-white" id="faq">
       <div className="container mx-auto px-4 max-w-7xl">
         <div className="max-w-7xl mx-auto">
 
@@ -59,7 +81,7 @@ export function FAQSection() {
             ))}
           </Accordion>
 
-          {/* Soft reassurance footer */}
+          {/* Footer note */}
           <div className="mt-16 text-center">
             <p className="text-sm text-gray-500 max-w-7xl mx-auto">
               These answers are based on commonly accepted clinical practices. Individual treatment plans may vary.
@@ -71,5 +93,3 @@ export function FAQSection() {
     </section>
   );
 }
-
-

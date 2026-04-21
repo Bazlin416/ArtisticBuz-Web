@@ -29,6 +29,8 @@ export function BaldnessTypeCard({
     <button
       onClick={() => !disabled && onSelect(type)}
       disabled={disabled}
+      aria-label={`${type.title} — ${type.grafts} grafts${isSelected ? ", selected" : ""}`}
+      aria-pressed={isSelected}
       className={cn(
         'relative p-6 rounded-xl border-2 transition-all duration-300 text-left w-full',
         disabled

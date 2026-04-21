@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Loader2, CheckCircle, AlertCircle, RefreshCw } from 'lucide-react';
+import { Loader2, CheckCircle, AlertCircle, RefreshCw, Calendar, Calculator, UserCheck, BookOpen } from 'lucide-react';
 import { useAuth } from '@/contexts/auth-context';
+import Link from 'next/link';
 
 export default function SuccessContent() {
   const router = useRouter();
@@ -17,16 +18,14 @@ export default function SuccessContent() {
   const [debugInfo, setDebugInfo] = useState('');
   const [retryCount, setRetryCount] = useState(0);
   const [purchaseTracked, setPurchaseTracked] = useState(false);
+  const [expiryDate, setExpiryDate] = useState<string>('');
 
   const maxRetries = 2;
 
-  /** Ensure subscription state actually updates */
   const verifySubscriptionUpdate = async (attempt = 0): Promise<boolean> => {
     if (attempt >= 3) return false;
-
     await checkSubscription();
     await new Promise(res => setTimeout(res, 500));
-
     if (isSubscribed) return true;
     return verifySubscriptionUpdate(attempt + 1);
   };
@@ -54,36 +53,23 @@ export default function SuccessContent() {
         throw new Error(data.error || 'Payment verification failed');
       }
 
-      // ✅ Track Meta Pixel once
       if (typeof window !== 'undefined' && window.fbq && !purchaseTracked) {
-        window.fbq('track', 'Purchase', {
-          currency: 'USD',
-          value: 1.0,
-        });
+        window.fbq('track', 'Purchase', { currency: 'USD', value: 1.0 });
         setPurchaseTracked(true);
       }
+
+      // Compute expiry label (now + 14 days)
+      const expiry = new Date();
+      expiry.setDate(expiry.getDate() + 14);
+      setExpiryDate(expiry.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }));
 
       setStatus('verifying');
       setMessage('Payment verified! Activating your subscription…');
 
-      const subscriptionReady = await verifySubscriptionUpdate();
+      await verifySubscriptionUpdate();
 
       setStatus('success');
-      setMessage(
-        subscriptionReady
-          ? 'Subscription activated successfully!'
-          : 'Payment successful! Subscription may take a moment to activate.'
-      );
-
-      setDebugInfo(
-        subscriptionReady
-          ? 'You now have full access.'
-          : 'If access is delayed, refresh the page.'
-      );
-
-      setTimeout(() => {
-        router.push('/#calculator');
-      }, 2000);
+      setMessage('Subscription activated!');
 
     } catch (error: any) {
       if (retryCount < maxRetries) {
@@ -104,45 +90,99 @@ export default function SuccessContent() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-xl shadow-lg p-8 max-w-md w-full">
+      <div className="bg-white rounded-2xl shadow-lg p-8 max-w-lg w-full">
 
-        {status === 'loading' && (
+        {/* Loading */}
+        {(status === 'loading' || status === 'verifying') && (
           <div className="text-center">
-            <Loader2 className="h-16 w-16 animate-spin text-emerald-600 mx-auto mb-4" />
-            <h2 className="text-xl font-bold">Completing Purchase</h2>
-            <p className="text-gray-600">{debugInfo}</p>
+            {status === 'loading'
+              ? <Loader2 className="h-14 w-14 animate-spin text-emerald-600 mx-auto mb-4" />
+              : <RefreshCw className="h-14 w-14 animate-spin text-blue-600 mx-auto mb-4" />
+            }
+            <h2 className="text-xl font-bold text-gray-900 mb-1">
+              {status === 'loading' ? 'Completing Purchase' : 'Activating Subscription'}
+            </h2>
+            <p className="text-gray-500 text-sm">{status === 'loading' ? debugInfo : message}</p>
           </div>
         )}
 
-        {status === 'verifying' && (
-          <div className="text-center">
-            <RefreshCw className="h-16 w-16 animate-spin text-blue-600 mx-auto mb-4" />
-            <h2 className="text-xl font-bold">Activating Subscription</h2>
-            <p className="text-gray-600">{message}</p>
-          </div>
-        )}
-
+        {/* Success */}
         {status === 'success' && (
-          <div className="text-center">
-            <CheckCircle className="h-16 w-16 text-emerald-600 mx-auto mb-4" />
-            <h2 className="text-xl font-bold">{message}</h2>
-            <p className="text-gray-500">{debugInfo}</p>
+          <div className="space-y-6">
+            {/* Header */}
+            <div className="text-center">
+              <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <CheckCircle className="h-9 w-9 text-emerald-600" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-1">You're all set!</h2>
+              <p className="text-gray-600 text-sm">Your 14-day full access is now active.</p>
+            </div>
+
+            {/* Access card */}
+            <div className="bg-emerald-50 border border-emerald-200 rounded-xl px-5 py-4 flex items-center justify-between">
+              <div>
+                <p className="text-xs text-emerald-700 font-semibold uppercase tracking-wide mb-0.5">Access expires</p>
+                <p className="text-lg font-bold text-emerald-800">{expiryDate || '14 days from today'}</p>
+              </div>
+              <Calendar className="w-8 h-8 text-emerald-500" />
+            </div>
+
+            {/* What's unlocked */}
+            <div>
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">What you've unlocked</p>
+              <ul className="space-y-2">
+                {[
+                  "Full graft estimates based on the Norwood scale",
+                  "Female pattern & hair texture adjustments",
+                  "Cost range in your local currency",
+                  "3D scalp area visualisation",
+                  "Specialist consultation form",
+                  "Hair loss FAQ library",
+                ].map((item) => (
+                  <li key={item} className="flex items-center gap-2 text-sm text-gray-700">
+                    <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Next steps */}
+            <div>
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Your next steps</p>
+              <div className="space-y-3">
+                {[
+                  { icon: Calculator, step: "1", text: "Use the 3D model to select affected scalp areas" },
+                  { icon: BookOpen, step: "2", text: "Pick your Norwood pattern from the grid" },
+                  { icon: UserCheck, step: "3", text: "Submit a specialist consultation form" },
+                ].map(({ icon: Icon, step, text }) => (
+                  <div key={step} className="flex items-center gap-3 bg-gray-50 rounded-xl px-4 py-3">
+                    <div className="w-7 h-7 bg-emerald-600 text-white rounded-full text-xs font-bold flex items-center justify-center shrink-0">{step}</div>
+                    <Icon className="w-4 h-4 text-gray-400 shrink-0" />
+                    <p className="text-sm text-gray-700">{text}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <Link
+              href="/#calculator"
+              className="block w-full text-center bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3.5 rounded-xl transition-all shadow-md"
+            >
+              Go to Calculator →
+            </Link>
           </div>
         )}
 
+        {/* Error */}
         {status === 'error' && (
           <div className="text-center">
-            <AlertCircle className="h-16 w-16 text-red-600 mx-auto mb-4" />
-            <h2 className="text-xl font-bold">{message}</h2>
-            <p className="text-gray-500 mb-4">{debugInfo}</p>
-
+            <AlertCircle className="h-14 w-14 text-red-500 mx-auto mb-4" />
+            <h2 className="text-xl font-bold text-gray-900 mb-1">{message}</h2>
+            <p className="text-gray-500 text-sm mb-6">{debugInfo}</p>
             <button
-              onClick={() => {
-                setRetryCount(0);
-                setStatus('loading');
-                verifyPayment();
-              }}
-              className="w-full bg-emerald-600 text-white py-2 rounded-lg"
+              onClick={() => { setRetryCount(0); setStatus('loading'); verifyPayment(); }}
+              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 rounded-xl transition-all"
             >
               Try Again
             </button>

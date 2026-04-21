@@ -30,9 +30,7 @@ export async function POST(request: NextRequest) {
       // Parse form data (not JSON!)
       const formData = await request.formData();
 
-      // Extract text fields
-      const to = formData.get('to') as string;
-      const cc = formData.get('cc') as string;
+      // Extract text fields — recipient addresses are resolved server-side from env vars
       const subject = formData.get('subject') as string;
       const html = formData.get('html') as string;
       const formDataJson = formData.get('formData') as string;
@@ -40,19 +38,14 @@ export async function POST(request: NextRequest) {
       const estimatedGrafts = formData.get('estimatedGrafts') as string;
       const estimatedPrice = formData.get('estimatedPrice') as string;
 
+      // Resolve recipients from environment — never trust client-supplied addresses
+      const to = process.env.CONSULTATION_EMAIL_TO;
+      const cc = process.env.CONSULTATION_EMAIL_CC;
+
       // Validate required fields
       if (!to || !subject || !html) {
         return NextResponse.json(
-          { error: 'Missing required fields: to, subject, or html' },
-          { status: 400 }
-        );
-      }
-
-      // Validate email format
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(to)) {
-        return NextResponse.json(
-          { error: 'Invalid recipient email address' },
+          { error: 'Missing required fields: subject or html, or CONSULTATION_EMAIL_TO is not configured' },
           { status: 400 }
         );
       }
@@ -109,12 +102,12 @@ export async function POST(request: NextRequest) {
 
       // Create a transporter with DNS configuration
       const transporter = nodemailer.createTransport({
-        host: 'mail.artisticbuz.com',
+        host: process.env.SMTP_HOST || 'mail.artisticbuz.com',
         port: parseInt(process.env.SMTP_PORT || '465'),
         secure: true,
         auth: {
-          user: 'support@artisticbuz.com',
-          pass: 'ArtB@#2025',
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS,
         },
         // DNS and timeout configurations
         connectionTimeout: 10000, // 10 seconds for initial connection
@@ -181,7 +174,7 @@ export async function POST(request: NextRequest) {
 
       // Configure email options with attachments
       const mailOptions = {
-        from: '"Hair Graft Calculator Support" <support@artisticbuz.com>',
+        from: process.env.SMTP_FROM || `"Hair Graft Calculator Support" <${process.env.SMTP_USER}>`,
         to: to,
         cc: cc ? cc : undefined,
         subject: subject,

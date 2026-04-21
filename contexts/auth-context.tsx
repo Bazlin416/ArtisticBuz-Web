@@ -4,12 +4,12 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { User, Session, AuthError } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase";
-import { checkAndUpdateSubscriptionExpiration } from "@/lib/subscription-utils";
 
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
+  subscriptionLoading: boolean;
   signUp: (
     email: string,
     password: string,
@@ -30,6 +30,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [subscriptionLoading, setSubscriptionLoading] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState(false);
   const supabase = createClient();
 
@@ -40,10 +41,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
+    setSubscriptionLoading(true);
     try {
       const supabase = createClient();
 
-      // Simple check - just see if there's an active subscription
       const { data, error } = await supabase
         .from("subscriptions")
         .select("status, current_period_end")
@@ -55,7 +56,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      // Check if subscription is active AND not expired
       const isActive = data.status === "active";
       const now = new Date();
       const periodEnd = new Date(data.current_period_end);
@@ -65,6 +65,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
       console.error("Error checking subscription:", error);
       setIsSubscribed(false);
+    } finally {
+      setSubscriptionLoading(false);
     }
   };
 
@@ -127,6 +129,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     user,
     session,
     loading,
+    subscriptionLoading,
     signUp,
     signIn,
     signOut,

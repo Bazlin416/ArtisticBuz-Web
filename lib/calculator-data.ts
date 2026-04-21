@@ -172,7 +172,7 @@ export const faqs = [
   {
     question: "Can grafts grow naturally after transplantation?",
     answer:
-      "Yes! Transplanted hair grafts are taken from the permanent zone at the back of your head, which is genetically resistant to balding. Once transplanted, these grafts will continue to grow naturally for a 14 days, requiring no special maintenance.",
+      "Yes! Transplanted hair grafts are taken from the permanent zone at the back of your head, which is genetically resistant to balding. Once transplanted, these grafts will continue to grow naturally for a lifetime, though they may shed initially before regrowing permanently within 3–6 months.",
   },
   {
     question: "How long does a hair transplant procedure take?",

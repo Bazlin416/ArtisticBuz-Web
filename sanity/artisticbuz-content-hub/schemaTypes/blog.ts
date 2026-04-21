@@ -127,13 +127,14 @@ export const blog = defineType({
     },
 
     /* -----------------------------
-     * TAGS - SIMPLIFIED TO SINGLE STRING FIELD
+     * TAGS
      * ----------------------------- */
     {
       name: 'tags',
       title: 'Tags',
-      type: 'string',
-      description: 'Comma-separated tags',
+      type: 'array',
+      of: [{ type: 'string' }],
+      options: { layout: 'tags' },
     },
 
     /* -----------------------------
@@ -161,7 +162,8 @@ export const blog = defineType({
     {
       name: 'author',
       title: 'Author',
-      type: 'string',
+      type: 'reference',
+      to: [{ type: 'author' }],
       validation: (Rule: any) => Rule.required(),
     },
   ],
@@ -171,11 +173,12 @@ export const blog = defineType({
       title: 'title',
       media: 'mainImage',
       discover: 'discoverEligible',
+      authorName: 'author.name',
     },
-    prepare({ title, media, discover }: any) {
+    prepare({ title, media, discover, authorName }: any) {
       return {
         title,
-        subtitle: discover ? 'Eligible for Google Discover' : '❌ Not eligible for Discover',
+        subtitle: `${authorName ? `By ${authorName} · ` : ''}${discover ? 'Eligible for Google Discover' : '❌ Not eligible for Discover'}`,
         media,
       }
     },

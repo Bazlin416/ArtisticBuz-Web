@@ -132,14 +132,33 @@ export default async function BlogPage() {
                 </div>
             </div>
 
-            {/* Back to Home */}
-            <div className="mb-8 container mx-auto px-4 max-w-7xl">
-                <Link
-                    href="/"
-                    className="inline-block text-emerald-600 font-semibold hover:underline"
-                >
-                    ← Back to Home
-                </Link>
+            {/* CTA Banner */}
+            <div className="container mx-auto px-4 max-w-7xl pb-28">
+                <div className="rounded-3xl bg-gradient-to-br from-emerald-600 via-teal-600 to-emerald-700 p-12 text-center text-white shadow-xl">
+                    <p className="text-xs font-semibold uppercase tracking-widest text-emerald-200 mb-3">
+                        Ready to Start?
+                    </p>
+                    <h2 className="text-3xl md:text-4xl font-bold mb-4 leading-tight">
+                        Put the Knowledge Into Action
+                    </h2>
+                    <p className="text-emerald-100 mb-8 max-w-xl mx-auto leading-relaxed text-lg">
+                        Our hair graft calculator gives you a clinically guided estimate in minutes. Understand your options before you book anything.
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                        <Link
+                            href="/#calculator"
+                            className="px-8 py-4 rounded-xl bg-white text-emerald-700 font-semibold text-lg hover:bg-emerald-50 shadow-lg transition-all duration-300"
+                        >
+                            Try the Calculator →
+                        </Link>
+                        <Link
+                            href="/"
+                            className="px-8 py-4 rounded-xl border-2 border-white/60 text-white font-semibold text-lg hover:bg-white/10 transition-all duration-300"
+                        >
+                            ← Back to Home
+                        </Link>
+                    </div>
+                </div>
             </div>
         </section>
     )

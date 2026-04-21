@@ -19,9 +19,10 @@ interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
   defaultTab?: 'signin' | 'signup';
+  onSuccess?: () => void;
 }
 
-export function AuthModal({ isOpen, onClose, defaultTab = 'signin' }: AuthModalProps) {
+export function AuthModal({ isOpen, onClose, defaultTab = 'signin', onSuccess }: AuthModalProps) {
   const { signIn, signUp } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -51,6 +52,7 @@ export function AuthModal({ isOpen, onClose, defaultTab = 'signin' }: AuthModalP
     } else {
       setLoading(false);
       onClose();
+      onSuccess?.();
     }
   };
 
@@ -83,6 +85,7 @@ export function AuthModal({ isOpen, onClose, defaultTab = 'signin' }: AuthModalP
     } else {
       setLoading(false);
       onClose();
+      onSuccess?.();
     }
   };
 
