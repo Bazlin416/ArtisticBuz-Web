@@ -79,6 +79,20 @@ export default function RootLayout({
         `,
           }}
         />
+        <Script
+          id="buzcall-voice-widget"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+          (function(w,d,s,o,f,js){
+            w[o]=w[o]||function(){(w[o].q=w[o].q||[]).push(arguments)};
+            js=d.createElement(s);js.id=o;js.src=f;js.async=1;
+            (d.head||d.body).appendChild(js);
+          }(window,document,'script','vw','https://buzcall.ai/widget/embed.js'));
+          vw('init', 'wgt_ymS8wuyv_stTKgAvBEwcuJ36');
+        `,
+          }}
+        />
         <noscript>
           <img
             height="1"
