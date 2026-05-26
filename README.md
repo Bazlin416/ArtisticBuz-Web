@@ -422,7 +422,7 @@ Register `https://artisticbuz.com/api/webhook` in the Stripe dashboard under **D
 In the [Sanity management console](https://www.sanity.io/manage), add the following under **API > CORS Origins**:
 
 - `https://artisticbuz.com`
-- `http://localhost:3000` (for local development)
+- `http://localhost:3000` 
 
 ### Build Command
 
