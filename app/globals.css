@@ -79,4 +79,28 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Ensure the BuzCall voice/chat widget remains visible and responsive on smaller screens */
+  #vw-container {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    right: 16px !important;
+    bottom: max(16px, env(safe-area-inset-bottom)) !important;
+    max-width: min(calc(100vw - 24px), 420px) !important;
+  }
+
+  @media (max-width: 640px) {
+    #vw-container {
+      right: 12px !important;
+      bottom: max(12px, env(safe-area-inset-bottom)) !important;
+      max-width: calc(100vw - 20px) !important;
+    }
+
+    .vw-support-toggle,
+    .vw-launcher-avatar {
+      width: 54px !important;
+      height: 54px !important;
+    }
+  }
 }

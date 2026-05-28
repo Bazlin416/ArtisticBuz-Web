@@ -58,8 +58,8 @@ export default function HairGraftCalculator({
 
   /* ================= UI ================= */
   return (
-    <div className="w-full max-w-4xl mx-auto py-10 px-5">
-      <h1 className="text-3xl font-bold text-center mb-3">
+    <div className="w-full max-w-full mx-auto py-10 px-4 sm:px-5">
+      <h1 className="text-3xl sm:text-4xl font-bold text-center mb-3">
         Hair Graft Calculator
       </h1>
       <p className="text-center text-gray-600 mb-6">
@@ -114,13 +114,13 @@ export default function HairGraftCalculator({
       </div>
 
       {/* RESULTS */}
-      <div className="flex gap-4">
-        <div className="flex-1 p-6 bg-gray-100 rounded-xl text-center">
+      <div className="flex flex-col gap-4 sm:flex-row">
+        <div className="flex-1 p-6 bg-gray-100 rounded-xl text-center min-w-0">
           <p className="text-xl font-bold">GRAFTS</p>
           <p className="text-3xl mt-2">{finalGrafts}</p>
         </div>
 
-        <div className="flex-1 p-6 bg-blue-600 text-white rounded-xl text-center">
+        <div className="flex-1 p-6 bg-blue-600 text-white rounded-xl text-center min-w-0">
           <p className="text-xl font-bold">HAIRS</p>
           <p className="text-3xl mt-2">{finalHair}</p>
         </div>

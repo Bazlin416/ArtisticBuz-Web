@@ -81,7 +81,7 @@ export default function RootLayout({
         />
         <Script
           id="buzcall-voice-widget"
-          strategy="afterInteractive"
+          strategy="beforeInteractive"
           dangerouslySetInnerHTML={{
             __html: `
           (function(w,d,s,o,f,js){
